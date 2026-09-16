@@ -69,7 +69,7 @@ cd rer-dsp-core
 
 Não é necessário criar nem copiar o `.env` manualmente. O arquivo é gerado automaticamente na primeira execução de `./config.sh` ou `./setup.sh`, a partir de `.env.example`, quando ainda não existir.
 
-Se precisar personalizar portas, credenciais dos 2 bancos ou paths dos repositórios irmãos antes de subir a stack, edite o `.env` **depois** que um desses scripts o criar. As variáveis do adotante (fonte JDBC, SRID) são preenchidas no Passo 3 pelo wizard; o modo de migração é escolhido no Passo 4 (`./setup.sh`).
+Se precisar personalizar portas, credenciais dos 2 bancos ou paths dos repositórios irmãos antes de subir a stack, edite o `.env` **depois** que um desses scripts o criar. JDBC, SRID e object storage (`DSP_OBJECT_STORAGE_*`) vêm do Passo 3 (`./config.sh`). Modo de migração, `DSP_MIGRATION_CRON` e `DSP_GEO_FILE_GENERATION_CRON` vêm do Passo 4 (`./setup.sh`, adotante real).
 
 ### Passo 3 — `./config.sh`
 
@@ -88,6 +88,7 @@ Escolha a opção adequada:
 - **Opção 2 — Adotante real (ETL)**: requer `./config.sh`. O script pergunta em sequência:
     1. **Run now** ou **Schedule for later** (quando roda a carga inicial)
     2. **One-time** ou **Continuous** (comportamento depois da primeira carga)
+    3. **Cron de pré-geração** — horário do job geo-file (`DSP_GEO_FILE_GENERATION_CRON`, 5 campos; padrão do `.env` ou `0 2 * * *`), depois da janela de migração quando houver re-sync
 
 Combinações típicas:
 
@@ -98,7 +99,7 @@ Combinações típicas:
 | Run now + Continuous | `continuous` | Migra no setup; supercronic nos ciclos seguintes |
 | Schedule + Continuous | `continuous` + agenda | Primeira carga na data; depois supercronic |
 
-No **Continuous**, o setup pergunta a frequência (diária, a cada N horas ou N minutos) e grava `DSP_MIGRATION_CRON`. Fuso: `DSP_MIGRATION_TZ`.
+No **Continuous**, o setup pergunta a frequência (diária, a cada N horas ou N minutos) e grava `DSP_MIGRATION_CRON`. O cron de pré-geração é gravado no mesmo passo final do setup. Fuso: `DSP_MIGRATION_TZ`. Reexecutar `./setup.sh` repete as perguntas com default do `.env`.
 
 - **Opção 3 — status/cleanup**: inspeciona ou remove recursos Docker; não migra.
 

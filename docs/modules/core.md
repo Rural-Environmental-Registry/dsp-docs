@@ -57,8 +57,12 @@ Wizard interativo (`scripts/apply_adopter_config.py`) que gera `config/adopter/a
 - Camadas de mapa (`mapLayersConfig.json`) — grupos WMS, SRIDs.
 - About opcional (`config/about/`).
 - `application.yaml` do job de migração — datasources e mapeamento ETL (watermark).
+- `application.yaml` do job geo-file — conexão S3 (SeaweedFS); **sem** cron no YAML.
+- Variáveis `DSP_SOURCE_*` e `DSP_OBJECT_STORAGE_*` no `.env` (credenciais da origem e do bucket).
 
 Rodar sem argumentos (`./config.sh`). Antes do wizard, o script confere os repositórios irmãos (`rer-dsp-backend`, `rer-dsp-frontend`, `rer-dsp-job-data-migration`, `rer-dsp-job-geo-file-generation`) e oferece clonar o que faltar.
+
+O wizard **não** pergunta horário de job batch nem grava `DSP_MIGRATION_CRON` ou `DSP_GEO_FILE_GENERATION_CRON`. Reaplicar (opção **1**) não altera crons no `.env`.
 
 **Primeira execução** (sem `adopter-config.yaml` ainda): o script pergunta como configurar:
 
@@ -169,7 +173,11 @@ Prepara bancos, GeoServer e (no fluxo real) a primeira migração. Roda sem argu
 
 No modo **Continuous**, o script pergunta **How often should the data be synchronized after the initial migration?**: todo dia num horário; a cada N horas; ou a cada N minutos (1–59, útil para teste local). O horário de *Schedule for later* é reutilizado se a escolha for “todo dia”.
 
-O adotante não digita a expressão cron manualmente. Fuso: `DSP_MIGRATION_TZ` no `.env` (veja `.env.example`).
+Em seguida (ainda no step 3 do setup, opção 2), pergunta o **cron de pré-geração** de arquivos de download — expressão Unix de **5 campos** para `DSP_GEO_FILE_GENERATION_CRON` (padrão: valor atual do `.env` ou `0 2 * * *`). Deve ficar numa janela **depois** da migração periódica, quando houver `DSP_MIGRATION_CRON`. O adotante não digita a expressão de migração manualmente; para pré-geração, informa o cron diretamente ou aceita o padrão com Enter.
+
+Valores de migração e pré-geração são gravados no `.env` no **fim** do setup (step 9), junto com `DSP_MIGRATION_*`. Reexecutar `./setup.sh` (adotante real) repete as perguntas, usando o `.env` como padrão.
+
+Fuso da migração: `DSP_MIGRATION_TZ` no `.env` (veja `.env.example`). Pré-geração herda `DSP_MIGRATION_TZ` quando `DSP_GEO_FILE_GENERATION_TZ` está vazio.
 
 | Combinação | `DSP_MIGRATION_EXECUTION_MODE` | Container do job após o setup |
 |------------|-------------------------------|------------------------------|
@@ -289,7 +297,7 @@ conferir o comportamento. Para limpar o cache, remova o volume `dsp_gateway_cach
 
 O `.env` é criado automaticamente na primeira execução de `./config.sh`, `./setup.sh` ou `./start.sh` (a partir de `.env.example`). Não é necessário copiá-lo manualmente.
 
-Embora o assistente de configuração `./config.sh` elimine a necessidade de editar manualmente o `.env` na maioria dos casos, compreender as principais variáveis pode ser útil para personalizar a instalação, solucionar problemas ou entender como o processo de implantação e migração é configurado.
+Embora o `./config.sh` preencha JDBC, SRID e object storage no `.env`, as **agendas** de migração e pré-geração vêm do `./setup.sh` (adotante real). Compreender as variáveis abaixo ajuda a personalizar a instalação e a solucionar problemas.
 
 | Variável | Função |
 |----------|--------|
@@ -299,6 +307,9 @@ Embora o assistente de configuração `./config.sh` elimine a necessidade de edi
 | `DSP_MIGRATION_CRON` | Cron Unix de 5 campos gerado pelo setup (ex.: `0 */6 * * *` ou `*/2 * * * *`). Só `continuous` |
 | `DSP_MIGRATION_SCHEDULED_AT` | Data/hora da primeira carga quando o setup escolhe **Schedule for later** |
 | `DSP_MIGRATION_TZ` | Fuso IANA do relógio (`.env.example`) |
+| `DSP_GEO_FILE_GENERATION_EXECUTION_MODE` | `continuous` (padrão): supercronic em `DSP_GEO_FILE_GENERATION_CRON`. `once`: uma execução via `compose run` |
+| `DSP_GEO_FILE_GENERATION_CRON` | Cron Unix de 5 campos para o job geo-file (ex.: `0 2 * * *`). Definido no `./setup.sh` (adotante real), **não** no `./config.sh` |
+| `DSP_GEO_FILE_GENERATION_TZ` | Fuso da pré-geração; vazio herda `DSP_MIGRATION_TZ` |
 | Credenciais dos 2 bancos do core | Usuário/senha de dsp-db e dsp-geoserver-db |
 | `DSP_GEOSERVER_WFS_BASE_URL` | URL WFS do GeoServer Download na rede Docker (backend → download) |
 | `DSP_PUBLIC_BASE_URL` | URL pública da stack (`http://localhost:8026`). Alimenta URLs WMS/WFS do `./config.sh` e `PROXY_BASE_URL` dos GeoServers |
@@ -308,7 +319,7 @@ Embora o assistente de configuração `./config.sh` elimine a necessidade de edi
 | `DSP_ABOUT_CONFIG_FILE` / `DSP_ABOUT_CONTENT_DIR` | Índice About e pasta Markdown (default `file:/config/about/…`) |
 | `DSP_OBJECT_STORAGE_ENDPOINT` | Quando definido, habilita o job geo-file (`profile=geo-file`) |
 | Build args do frontend | `VITE_BASE_URL`, `VITE_DSP_API_URL` — definem base path e URL da API usadas no build da imagem |
-| `DSP_OBJECT_STORAGE_*` / `DSP_OBJECT_STORAGE_HOST_PORT` | Endpoint interno do SeaweedFS (`http://dsp-object-storage:8333`), bucket, credenciais e porta no host para diagnóstico. Demo Brasil deixa o endpoint vazio |
+| `DSP_OBJECT_STORAGE_*` / `DSP_OBJECT_STORAGE_HOST_PORT` | Endpoint interno do SeaweedFS (`http://dsp-object-storage:8333`), bucket, credenciais e porta no host para diagnóstico. Preenchidos pelo `./config.sh`. Demo Brasil deixa o endpoint vazio |
 | `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH` / `DSP_JOB_MIGRATION_PATH` / `DSP_JOB_GEO_FILE_GENERATION_PATH` | Paths dos repositórios irmãos usados na orquestração de build |
 
 Variáveis antigas `DSP_RUN_MIGRATION` / `DSP_SKIP_MIGRATION` são rejeitadas. `DSP_MIGRATION_SYNC_INTERVAL` não é mais usado.
@@ -329,11 +340,15 @@ flowchart LR
   apply --> downloadJson["downloadThemesConfig.json"]
   apply --> aboutJson["about-config.json"]
   apply --> appYaml["application.yaml"]
+  apply --> geoYaml["Job geo-file application.yaml"]
+  apply --> dotenvStorage[".env DSP_OBJECT_STORAGE_* / DSP_SOURCE_*"]
   installJson --> build["docker compose build<br/>contexto dsp_config"]
   mapJson --> build
   downloadJson --> build
   aboutJson --> build
   appYaml --> build
+  geoYaml --> build
+  dotenvStorage --> setupSh["./setup.sh grava crons no .env"]
   build --> backendImg["dsp-backend /config"]
   build --> geoserverImg["GeoServers /config"]
   build --> jobImg["dsp-job-migration /config"]
@@ -347,8 +362,8 @@ flowchart LR
 - **`downloadThemesConfig.json`** — temas de download (AOI + `etl.layers[]`); `wfsBaseUrl` em `${DSP_PUBLIC_BASE_URL}/geoserver-download/dsp/wfs`.
 - **`about-config.json`** — índice About (`enabled`, `bannerTitle`, `tabs` com ids `tab-1`, `tab-2`, …).
 - **`application.yaml`** — plano ETL. Copiado para a imagem do job no build (com entrypoint e scripts de publicação GeoServer).
+- **`config/Job-Geo-File-Generation/application/application.yaml`** — S3 do job de pré-geração (sem cron; agenda só no `.env` via `./setup.sh`).
 - **Imagens `dsp-backend`, GeoServers, `dsp-job-migration`, bancos e `dsp-gateway`** — configs e SQL de init copiados no build via `dsp_config`; volumes guardam só dados (e cache do gateway).
-- **Imagem `dsp-object-storage`** — SeaweedFS (`weed mini`) com credenciais em `s3.json` na imagem. Volume `dsp_object_storage_data` guarda os objetos. Capacidade total depende do disco do host; `-master.volumeSizeLimitMB` controla o tamanho de cada volume interno, não uma quota fixa.
-- **Imagem `dsp-object-storage`** — SeaweedFS (`weed mini`) com credenciais em `s3.json` na imagem. Volume `dsp_object_storage_data` guarda os objetos. Capacidade total depende do disco do host; `-master.volumeSizeLimitMB` controla o tamanho de cada volume interno, não uma quota fixa.
+- **Imagem `dsp-object-storage`** — SeaweedFS (`weed mini`) com credenciais em `s3.json` na imagem. Volume `dsp_object_storage_data` guarda os objetos; tamanho e quantidade de volumes internos são calculados pelo `weed mini` conforme o espaço livre no volume Docker.
 
 Veja também: [Fluxo de dados](../architecture/data-flow.md) (runtime) e [rer-dsp-backend](backend.md) (variáveis de ambiente de downloads).
