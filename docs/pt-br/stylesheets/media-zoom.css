@@ -1,0 +1,168 @@
+/* Mermaid diagrams and images: click to open zoom/pan fullscreen viewer */
+.md-typeset .mermaid.media-zoomable,
+.md-typeset .zoom-media-host.media-zoomable {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.md-typeset .mermaid.media-zoomable {
+  overflow-x: auto;
+}
+
+.md-typeset .zoom-media-host.media-zoomable img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.md-typeset .mermaid.media-zoomable::after,
+.md-typeset .zoom-media-host.media-zoomable::after {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.25rem;
+  background-color: var(--md-default-bg-color);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 3H5a2 2 0 0 0-2 2v3'/%3E%3Cpath d='M21 8V5a2 2 0 0 0-2-2h-3'/%3E%3Cpath d='M3 16v3a2 2 0 0 0 2 2h3'/%3E%3Cpath d='M16 21h3a2 2 0 0 0 2-2v-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1rem 1rem;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .mermaid.media-zoomable::after,
+[data-md-color-scheme="slate"] .md-typeset .zoom-media-host.media-zoomable::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 3H5a2 2 0 0 0-2 2v3'/%3E%3Cpath d='M21 8V5a2 2 0 0 0-2-2h-3'/%3E%3Cpath d='M3 16v3a2 2 0 0 0 2 2h3'/%3E%3Cpath d='M16 21h3a2 2 0 0 0 2-2v-3'/%3E%3C/svg%3E");
+}
+
+.md-typeset .mermaid.media-zoomable.media-zoom-hint-show::after,
+.md-typeset .zoom-media-host.media-zoomable.media-zoom-hint-show::after,
+.md-typeset .mermaid.media-zoomable:hover::after,
+.md-typeset .zoom-media-host.media-zoomable:hover::after,
+.md-typeset .mermaid.media-zoomable:focus-visible::after,
+.md-typeset .zoom-media-host.media-zoomable:focus-visible::after {
+  opacity: 0.9;
+}
+
+.md-typeset .mermaid.media-zoomable:focus-visible,
+.md-typeset .zoom-media-host.media-zoomable:focus-visible {
+  outline: 2px solid var(--md-accent-fg-color);
+  outline-offset: 2px;
+}
+
+.media-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--md-default-bg-color) 92%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.media-zoom-overlay[hidden] {
+  display: none !important;
+}
+
+.media-zoom-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-default-bg-color);
+}
+
+.media-zoom-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.media-zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  cursor: pointer;
+  color: var(--md-default-fg-color);
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.25rem;
+}
+
+.media-zoom-btn:hover {
+  border-color: var(--md-accent-fg-color);
+}
+
+.media-zoom-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.media-zoom-stage {
+  flex: 1;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.media-zoom-stage.is-panning {
+  cursor: grabbing;
+}
+
+.media-zoom-pan {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.media-zoom-overlay--mermaid .media-zoom-pan {
+  will-change: auto;
+}
+
+.media-zoom-pan > .mermaid,
+.media-zoom-pan > .zoom-media-host {
+  display: block;
+  width: max-content;
+  max-width: none;
+  margin: 0 auto;
+}
+
+/* Mermaid: SVG dimensions via JS; Chromium uses zoom (up to ~9.5×) + size for sharp scaling */
+.media-zoom-pan > .mermaid svg {
+  display: block;
+  max-width: none;
+  max-height: none;
+}
+
+.media-zoom-pan > .zoom-media-host img {
+  max-width: none;
+  width: auto;
+  height: auto;
+  max-height: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  drag: none;
+}
+
+.media-zoom-pan > .zoom-media-host {
+  pointer-events: none;
+}

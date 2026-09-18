@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+  <script>
+    (function () {
+      function currentBasePath() {
+        var match = location.pathname.match(/^(.*)\/(pt-br|en)(?:\/|$)/);
+        if (match) {
+          return match[1];
+        }
+        return location.pathname.replace(/\/index\.html$/i, "").replace(/\/$/, "");
+      }
+
+      function localeSlug(hreflang) {
+        return hreflang === "pt-BR" ? "pt-br" : "en";
+      }
+
+      function localeHref(hreflang) {
+        return location.origin + currentBasePath() + "/" + localeSlug(hreflang) + "/";
+      }
+
+      function localeFromPath(path) {
+        var match = path.match(/\/(pt-br|en)(?:\/|$)/);
+        return match ? match[1] : null;
+      }
+
+      function applyLocaleLinks() {
+        document
+          .querySelectorAll('link[rel="alternate"][hreflang], [data-dsp-locale-link]')
+          .forEach(function (el) {
+            var lang = el.getAttribute("hreflang");
+            if (!lang) {
+              return;
+            }
+            el.setAttribute("href", localeHref(lang));
+          });
+      }
+
+      function onLocaleClick(event) {
+        var el =
+          event.target.closest &&
+          event.target.closest("[data-dsp-locale-link], a.md-select__link");
+        if (!el) {
+          return;
+        }
+        var lang = el.getAttribute("hreflang");
+        if (!lang) {
+          return;
+        }
+        var target = localeHref(lang);
+        var targetLocale = localeFromPath(new URL(target).pathname);
+        var currentLocale = localeFromPath(location.pathname);
+        if (currentLocale && targetLocale && currentLocale === targetLocale) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return;
+        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        location.href = target;
+      }
+
+      applyLocaleLinks();
+      document.addEventListener("click", onLocaleClick, true);
+      if (typeof document$ !== "undefined" && document$.subscribe) {
+        document$.subscribe(applyLocaleLinks);
+      }
+    })();
+  </script>
+  {{ super() }}
+{% endblock %}

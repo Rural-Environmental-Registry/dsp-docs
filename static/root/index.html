@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RER DSP — Documentation</title>
+  <link rel="alternate" hreflang="pt-BR" href="pt-br/">
+  <link rel="alternate" hreflang="en" href="en/">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; }
+    h1 { font-size: 1.25rem; }
+    ul { padding-left: 1.25rem; }
+    /* Hidden by default so the page reads as a blank flash instead of
+       showing the chooser text right before the JS redirect fires.
+       The no-JS fallback below (and the safety timeout) reveal it again. */
+    body.js-redirect { visibility: hidden; }
+  </style>
+</head>
+<body class="js-redirect">
+  <h1>RER DSP — Documentação / Documentation</h1>
+  <p>Escolha o idioma / Choose a language:</p>
+  <ul>
+    <li><a id="link-pt" href="#">🇧🇷 Português (Brasil)</a></li>
+    <li><a id="link-en" href="#">🇺🇸 English</a></li>
+  </ul>
+  <noscript>
+    <style>body.js-redirect { visibility: visible; }</style>
+  </noscript>
+  <script>
+    (function () {
+      // Safety net: if the redirect below doesn't fire for any reason
+      // (blocked script, unexpected error), reveal the manual links
+      // instead of leaving the page permanently blank.
+      var revealTimer = setTimeout(function () {
+        document.body.classList.remove("js-redirect");
+      }, 5000);
+      function docsBasePath() {
+        var match = location.pathname.match(/^(.*)\/(pt-br|en)(?:\/|$)/);
+        if (match) {
+          return match[1];
+        }
+        return location.pathname.replace(/\/index\.html$/i, "").replace(/\/$/, "");
+      }
+
+      var base = docsBasePath();
+      var ptUrl = base + "/pt-br/";
+      var enUrl = base + "/en/";
+
+      document.getElementById("link-pt").href = ptUrl;
+      document.getElementById("link-en").href = enUrl;
+
+      var langs = [];
+      if (navigator.languages && navigator.languages.length) {
+        langs = Array.prototype.slice.call(navigator.languages);
+      }
+      if (navigator.language) {
+        langs.push(navigator.language);
+      }
+
+      var target = enUrl;
+      for (var i = 0; i < langs.length; i++) {
+        var tag = String(langs[i]).toLowerCase();
+        var primary = tag.match(/^([a-z]{2})/);
+        if (!primary) {
+          continue;
+        }
+        if (primary[1] === "pt") {
+          target = ptUrl;
+          break;
+        }
+        if (primary[1] === "en") {
+          target = enUrl;
+          break;
+        }
+      }
+
+      location.replace(target);
+    })();
+  </script>
+</body>
+</html>

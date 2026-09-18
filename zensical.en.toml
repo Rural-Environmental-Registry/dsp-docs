@@ -8,9 +8,9 @@
 
 [project]
 
-docs_dir = "docs/pt-br"
-site_dir = "site/pt-br"
-site_url = "__DOCS_PAGES_BASE__/pt-br/"
+docs_dir = "docs/en"
+site_dir = "site/en"
+site_url = "__DOCS_PAGES_BASE__/en/"
 
 # The site_name is shown in the page header and the browser window title
 #
@@ -21,7 +21,7 @@ site_name = "RER DSP"
 # meaningful description of the site content for use by search engines.
 #
 # Read more: https://zensical.org/docs/setup/basics/#site_description
-site_description = "Documentação da Data Sharing Platform (DSP) do Rural Environmental Registry (RER)."
+site_description = "Documentation for the Data Sharing Platform (DSP) of the Rural Environmental Registry (RER)."
 
 # The site_author attribute. This is used in the HTML head element.
 #
@@ -46,29 +46,29 @@ Rural Environmental Registry — GPL-3.0
 #
 # Read more: https://zensical.org/docs/setup/navigation/
 nav = [
-  { "Início" = "index.md" },
-  { "O que é o DSP" = "what-is-the-dsp.md" },
-  { "Módulos do DSP" = "dsp-modules.md" },
-  { "Começando rápido (demo local)" = "guides/quick-start.md" },
-  { "Instalação completa" = "guides/full-installation.md" },
-  { "Arquitetura" = [
-      { "Visão geral" = "architecture/overview.md" },
-      { "Fluxo de dados" = "architecture/data-flow.md" },
-      { "Bancos de dados" = "architecture/databases.md" },
+  { "Home" = "index.md" },
+  { "What is the DSP" = "what-is-the-dsp.md" },
+  { "DSP modules" = "dsp-modules.md" },
+  { "Quick start (local demo)" = "guides/quick-start.md" },
+  { "Full installation" = "guides/full-installation.md" },
+  { "Architecture" = [
+      { "Overview" = "architecture/overview.md" },
+      { "Data flow" = "architecture/data-flow.md" },
+      { "Databases" = "architecture/databases.md" },
     ]
   },
-  { "Referência dos módulos" = [
+  { "Module reference" = [
       { "rer-dsp-core" = "modules/core.md" },
       { "rer-dsp-backend" = "modules/backend.md" },
       { "rer-dsp-frontend" = "modules/frontend.md" },
       { "rer-dsp-job-data-migration" = [
-          { "Visão geral" = "modules/job-data-migration/overview.md" },
-          { "Migração de camadas genéricas" = "modules/job-data-migration/generic-layers.md" },
-          { "Validação pós-migração" = "modules/job-data-migration/post-migration-validation.md" },
+          { "Overview" = "modules/job-data-migration/overview.md" },
+          { "Generic layer migration" = "modules/job-data-migration/generic-layers.md" },
+          { "Post-migration validation" = "modules/job-data-migration/post-migration-validation.md" },
         ]
       },
       { "rer-dsp-job-geo-file-generation" = [
-          { "Visão geral" = "modules/job-geo-file-generation/overview.md" },
+          { "Overview" = "modules/job-geo-file-generation/overview.md" },
         ]
       },
     ]
@@ -134,7 +134,7 @@ custom_dir = "overrides"
 # Read more:
 # - https://zensical.org/docs/setup/language/
 #
-language = "pt-BR"
+language = "en"
 
 # Zensical provides a number of feature toggles that change the behavior
 # of the documentation site.
@@ -316,12 +316,12 @@ features = [
 [[project.theme.palette]]
 scheme = "default"
 toggle.icon = "lucide/sun"
-toggle.name = "Mudar para modo escuro"
+toggle.name = "Switch to dark mode"
 
 [[project.theme.palette]]
 scheme = "slate"
 toggle.icon = "lucide/moon"
-toggle.name = "Mudar para modo claro"
+toggle.name = "Switch to light mode"
 
 # ----------------------------------------------------------------------------
 # The "extra" section contains miscellaneous settings.
