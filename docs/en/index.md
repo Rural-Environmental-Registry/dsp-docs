@@ -87,7 +87,7 @@ flowchart LR
 ```
 
 !!! tip "Where to start"
-    The operational entry point is the `rer-dsp-core` repository: use `./config.sh`, `./setup.sh`, and `./start.sh` to bring up the stack with Docker Compose (PostgreSQL/PostGIS databases, nginx gateway, Exhibition and Download GeoServers, backend, frontend, and migration job).
+    The operational entry point is the `dsp-core` repository: use `./config.sh`, `./setup.sh`, and `./start.sh` to bring up the stack with Docker Compose (PostgreSQL/PostGIS databases, nginx gateway, Exhibition and Download GeoServers, backend, frontend, and migration job).
 
     With a real JDBC source, the core also starts object storage (SeaweedFS) and the geo-file job (pre-generated download CSV), via the Compose profile `object-storage`. In [Quick start](guides/quick-start.md) (demo with synthetic seed) those two services are not included—downloads use GeoServer Download.
 
@@ -113,4 +113,4 @@ flowchart LR
 
 ---
 
-This documentation (`rer-dsp-docs`) is the **single technical documentation source** for the DSP ecosystem—other repositories do not maintain their own `docs/` folders.
+This documentation (`dsp-docs`) is the **single technical documentation source** for the DSP ecosystem—other repositories do not maintain their own `docs/` folders.

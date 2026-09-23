@@ -19,7 +19,7 @@ Este guia é voltado a um **administrador de infraestrutura** responsável por c
 
 ```mermaid
 flowchart LR
-  r["Passo 1<br/>Organizar os repositórios"] --> e["Passo 2<br/>Entrar no rer-dsp-core"]
+  r["Passo 1<br/>Organizar os repositórios"] --> e["Passo 2<br/>Entrar no dsp-core"]
   e --> a["Passo 3<br/>./config.sh (wizard)"]
   a --> b["gera adopter-config.yaml<br/>e arquivos operacionais"]
   b --> c["Passo 4<br/>./setup.sh (opção 2)"]
@@ -28,51 +28,51 @@ flowchart LR
 
 ### Passo 1 — Organizar os repositórios
 
-O DSP é dividido em **repositórios irmãos** no GitHub. Recomendamos criar uma pasta `rer-dsp` e clonar tudo **no mesmo nível** — o `rer-dsp-core` espera os outros módulos em `../rer-dsp-backend`, `../rer-dsp-frontend`, etc.
+O DSP é dividido em **repositórios irmãos** no GitHub. Recomendamos criar uma pasta `dsp` e clonar tudo **no mesmo nível** — o `dsp-core` espera os outros módulos em `../dsp-backend`, `../dsp-frontend`, etc.
 
 #### Opção A — fluxo mais simples (recomendado)
 
 Crie a pasta, clone só o core e entre nele. Os scripts `./config.sh`, `./setup.sh` e `./start.sh` detectam repositórios irmãos ausentes e oferecem cloná-los automaticamente ao lado do core:
 
 ```bash
-mkdir rer-dsp && cd rer-dsp
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-core.git
-cd rer-dsp-core
+mkdir dsp && cd dsp
+git clone https://github.com/Rural-Environmental-Registry/dsp-core.git
+cd dsp-core
 ```
 
 Depois que você aceitar o clone automático nos scripts, a árvore típica fica assim:
 
 ```text
-rer-dsp/
-├── rer-dsp-core/          ← você trabalha aqui (config.sh, setup.sh, start.sh)
-├── rer-dsp-backend/
-├── rer-dsp-frontend/
-├── rer-dsp-job-data-migration/
-└── rer-dsp-job-geo-file-generation/
+dsp/
+├── dsp-core/          ← você trabalha aqui (config.sh, setup.sh, start.sh)
+├── dsp-backend/
+├── dsp-frontend/
+├── dsp-job-data-migration/
+└── dsp-job-geo-file-generation/
 ```
 
 #### Opção B — clone manual
 
-Clone todos os repositórios de aplicação como pastas irmãs dentro de `rer-dsp`:
+Clone todos os repositórios de aplicação como pastas irmãs dentro de `dsp`:
 
 ```bash
-mkdir rer-dsp && cd rer-dsp
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-core.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-backend.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-frontend.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-job-data-migration.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-job-geo-file-generation.git
+mkdir dsp && cd dsp
+git clone https://github.com/Rural-Environmental-Registry/dsp-core.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-backend.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-frontend.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-job-data-migration.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-job-geo-file-generation.git
 ```
 
 Resultado:
 
 ```text
-rer-dsp/
-├── rer-dsp-core/
-├── rer-dsp-backend/
-├── rer-dsp-frontend/
-├── rer-dsp-job-data-migration/
-└── rer-dsp-job-geo-file-generation/
+dsp/
+├── dsp-core/
+├── dsp-backend/
+├── dsp-frontend/
+├── dsp-job-data-migration/
+└── dsp-job-geo-file-generation/
 ```
 
 ### Passo 2 — Entrar no core
@@ -80,7 +80,7 @@ rer-dsp/
 Se você ainda não estiver dentro do core:
 
 ```bash
-cd rer-dsp/rer-dsp-core
+cd dsp/dsp-core
 ```
 
 Não é necessário criar nem copiar o `.env` manualmente. O arquivo é gerado automaticamente na primeira execução de `./config.sh` ou `./setup.sh`, a partir de `.env.example`, quando ainda não existir.
@@ -143,11 +143,11 @@ Usado **depois** do `./setup.sh`, com bancos, GeoServers e jobs (quando existire
 
 Ao final, abra no navegador **http://localhost:8026/dsp/** (ou a URL que o próprio `./start.sh` mostrar se você mudou porta ou endereço no `.env`).
 
-Detalhamento completo de cada opção e sub-fluxo: [rer-dsp-core](../modules/core.md#os-tres-scripts).
+Detalhamento completo de cada opção e sub-fluxo: [dsp-core](../modules/core.md#os-tres-scripts).
 
 ## Próximos passos
 
 | Quero... | Página |
 |----------|--------|
 | Entender o fluxo de dados detalhado | [Fluxo de dados](../architecture/data-flow.md) |
-| Ver todas as variáveis de ambiente do core | [rer-dsp-core](../modules/core.md) |
+| Ver todas as variáveis de ambiente do core | [dsp-core](../modules/core.md) |

@@ -1,6 +1,6 @@
-# rer-dsp-job-geo-file-generation — Visão geral
+# dsp-job-geo-file-generation — Visão geral
 
-Job batch do [DSP](../../index.md) que **pré-gera arquivos de download territoriais** (níveis 2 e 3) e publica no **SeaweedFS** (API S3). O backend entrega esses bytes quando existem; senão usa WFS no GeoServer Download. Orquestração: [rer-dsp-core](../core.md) (profile `object-storage`). Na [demo local](../../guides/quick-start.md) este job costuma ficar desligado.
+Job batch do [DSP](../../index.md) que **pré-gera arquivos de download territoriais** (níveis 2 e 3) e publica no **SeaweedFS** (API S3). O backend entrega esses bytes quando existem; senão usa WFS no GeoServer Download. Orquestração: [dsp-core](../core.md) (profile `object-storage`). Na [demo local](../../guides/quick-start.md) este job costuma ficar desligado.
 
 ## Sumário
 
@@ -162,5 +162,5 @@ Exige `application.yaml` com os três datasources, bucket acessível e `dsp-geos
 | Fluxo download (backend / S3 / WFS) | [Fluxo de dados](../../architecture/data-flow.md) |
 | Papéis de banco | [Bancos de dados](../../architecture/databases.md) |
 | Migração e flags | [Job data-migration](../job-data-migration/overview.md) |
-| Variáveis `.env` e Compose | [rer-dsp-core](../core.md) |
-| API de downloads | [rer-dsp-backend](../backend.md) |
+| Variáveis `.env` e Compose | [dsp-core](../core.md) |
+| API de downloads | [dsp-backend](../backend.md) |

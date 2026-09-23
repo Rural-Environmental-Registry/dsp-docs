@@ -21,8 +21,8 @@ A raiz (`/`) redireciona conforme o idioma do navegador (`pt*` → pt-BR; `en*` 
 ### 1. Clonar e entrar no repositório
 
 ```bash
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-docs.git
-cd rer-dsp-docs
+git clone https://github.com/Rural-Environmental-Registry/dsp-docs.git
+cd dsp-docs
 ```
 
 ### 2. Criar o ambiente e instalar dependências
@@ -84,7 +84,7 @@ zensical build -f zensical.en.toml
 
 A saída fica em `site/` (`index.html`, `pt-br/`, `en/`). Essa pasta não vai para o Git; o CI gera de novo no deploy.
 
-Para testar o **seletor de idioma** localmente, use o build completo em `site/` (pastas `/pt-br/` e `/en/` na mesma origem). O script [`start-docs.sh`](start-docs.sh) faz isso e abre [http://127.0.0.1:8000/pt-br/](http://127.0.0.1:8000/pt-br/). No GitHub Pages, um script acrescenta o prefixo `/rer-dsp-docs` aos links de idioma.
+Para testar o **seletor de idioma** localmente, use o build completo em `site/` (pastas `/pt-br/` e `/en/` na mesma origem). O script [`start-docs.sh`](start-docs.sh) faz isso e abre [http://127.0.0.1:8000/pt-br/](http://127.0.0.1:8000/pt-br/). No GitHub Pages, um script acrescenta o prefixo `/dsp-docs` aos links de idioma.
 
 ## Editar o conteúdo
 

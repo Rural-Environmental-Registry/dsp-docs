@@ -1,6 +1,6 @@
-# rer-dsp-job-data-migration — Visão geral
+# dsp-job-data-migration — Visão geral
 
-Job que **copia os dados geográficos do banco da sua organização** para dentro do DSP, de forma automática e repetível. Orquestração pelo [rer-dsp-core](../core.md) (`./setup.sh`). Detalhe dos bancos: [Bancos de dados](../../architecture/databases.md).
+Job que **copia os dados geográficos do banco da sua organização** para dentro do DSP, de forma automática e repetível. Orquestração pelo [dsp-core](../core.md) (`./setup.sh`). Detalhe dos bancos: [Bancos de dados](../../architecture/databases.md).
 
 ## Sumário
 
@@ -145,7 +145,7 @@ Cada “volta” do job é um processo que **sobe, trabalha e desliga**; no modo
 | Modos no `.env` | `DSP_MIGRATION_EXECUTION_MODE`: `once`, `scheduled-once`, `continuous` |
 | Flags de download | `requires_s3_file_regeneration` em `territory_level_2` / `_3` |
 
-Rodar o JAR isolado (sem core): Java 21, `./mvnw`, quatro bancos acessíveis e `application.yaml` gerado pelo `./config.sh` (repositório `rer-dsp-core`).
+Rodar o JAR isolado (sem core): Java 21, `./mvnw`, quatro bancos acessíveis e `application.yaml` gerado pelo `./config.sh` (repositório `dsp-core`).
 
 !!! tip "Publicação de camadas"
     O nome da camada no YAML do job deve bater com `mapLayersConfig.json`. **Run now** publica ao fim do setup; **Schedule for later** publica após a primeira migração agendada.
@@ -158,7 +158,7 @@ Rodar o JAR isolado (sem core): Java 21, `./mvnw`, quatro bancos acessíveis e `
 |------|--------|
 | Bancos e dual-write | [Bancos de dados](../../architecture/databases.md) |
 | Camadas genéricas | [Migração de camadas genéricas](generic-layers.md) |
-| Wizard e `application.yaml` | [rer-dsp-core](../core.md) · `config/Job-Data-Migration/application/` |
+| Wizard e `application.yaml` | [dsp-core](../core.md) · `config/Job-Data-Migration/application/` |
 | Checklist pós-carga | [Validação pós-migração](post-migration-validation.md) |
-| Pré-geração de CSV | [rer-dsp-job-geo-file-generation](../job-geo-file-generation/overview.md) |
+| Pré-geração de CSV | [dsp-job-geo-file-generation](../job-geo-file-generation/overview.md) |
 | Fluxo entre componentes | [Fluxo de dados](../../architecture/data-flow.md) |

@@ -147,10 +147,10 @@ Por que não guardar o polígono inteiro no `dsp-db`? Ver o aviso em [Arquitetur
 
 | Schema | Job | O que persiste |
 |--------|-----|----------------|
-| `data_migration` | `rer-dsp-job-data-migration` | Histórico `BATCH_*` e watermark em `BATCH_JOB_EXECUTION_SYNC_STATE` (avança só após `COMPLETED`) |
-| `geo_file_generation` | `rer-dsp-job-geo-file-generation` | Histórico `BATCH_*` das rodadas de pré-geração |
+| `data_migration` | `dsp-job-data-migration` | Histórico `BATCH_*` e watermark em `BATCH_JOB_EXECUTION_SYNC_STATE` (avança só após `COMPLETED`) |
+| `geo_file_generation` | `dsp-job-geo-file-generation` | Histórico `BATCH_*` das rodadas de pré-geração |
 
-SQL de init desses schemas vem do `rer-dsp-core` (imagens `dsp-db` e jobs). Detalhe operacional: [rer-dsp-core](../modules/core.md).
+SQL de init desses schemas vem do `dsp-core` (imagens `dsp-db` e jobs). Detalhe operacional: [dsp-core](../modules/core.md).
 
 ---
 
@@ -169,7 +169,7 @@ Fluxo resumido:
 2. Se a execução termina **`COMPLETED`**, marca territórios afetados na mesma janela temporal (`requires_s3_file_regeneration = true`). Na primeira carga, marca o conjunto territorial relevante.
 3. O geo-file, na agenda configurada no setup, processa só pendências, publica no SeaweedFS e desliga a flag por território quando termina todos os formatos.
 
-Se a migração **falha**, as flags **não** mudam. Mais contexto: [rer-dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md).
+Se a migração **falha**, as flags **não** mudam. Mais contexto: [dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md).
 
 ---
 
