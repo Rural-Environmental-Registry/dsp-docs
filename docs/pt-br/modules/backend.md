@@ -1,10 +1,10 @@
-# dsp-backend
+# rer-dsp-backend
 
-Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
+Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [rer-dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
 
 ## Objetivo
 
-O `dsp-backend` é a API REST do DSP: expõe dados de negócio, hierarquia territorial, downloads e configuração de mapas para o frontend e outros consumidores.
+O `rer-dsp-backend` é a API REST do DSP: expõe dados de negócio, hierarquia territorial, downloads e configuração de mapas para o frontend e outros consumidores.
 
 ## Responsabilidades
 
@@ -30,7 +30,7 @@ O `dsp-backend` é a API REST do DSP: expõe dados de negócio, hierarquia terri
 ./gradlew bootRun
 ```
 
-Ou via Docker, orquestrado pelo `dsp-core` — que oferece dois modos: [demo](../guides/quick-start.md) (seed sintético, sem banco externo) ou [instalação real](../guides/full-installation.md) (dados do adotante via fonte JDBC). No Docker o container não publica porta no host: a API é alcançada pelo gateway do core, em `/dsp-backend`.
+Ou via Docker, orquestrado pelo `rer-dsp-core` — que oferece dois modos: [demo](../guides/quick-start.md) (seed sintético, sem banco externo) ou [instalação real](../guides/full-installation.md) (dados do adotante via fonte JDBC). No Docker o container não publica porta no host: a API é alcançada pelo gateway do core, em `/dsp-backend`.
 
 ## Variáveis de ambiente
 
@@ -77,7 +77,7 @@ Os **dados** territoriais (unidades L1/L2/L3) ficam nas tabelas `dsp.territory_l
 
 | Item | Valor |
 |------|--------|
-| Arquivo default | `dsp-backend/src/main/resources/installationConfig.json` |
+| Arquivo default | `rer-dsp-backend/src/main/resources/installationConfig.json` |
 | Propriedade | `dsp.installation-config.file` |
 | Variável de ambiente | `DSP_INSTALLATION_CONFIG_FILE` |
 
@@ -197,8 +197,8 @@ O conteúdo institucional da página About pode ser configurado pelo adotante vi
 
 | Item | Valor |
 |------|--------|
-| Propriedade (índice) | `dsp.about-config.config-file`, default `file:../dsp-core/config/about/about-config.json` |
-| Propriedade (conteúdo) | `dsp.about-config.content-dir`, default `file:../dsp-core/config/about/` |
+| Propriedade (índice) | `dsp.about-config.config-file`, default `file:../rer-dsp-core/config/about/about-config.json` |
+| Propriedade (conteúdo) | `dsp.about-config.content-dir`, default `file:../rer-dsp-core/config/about/` |
 | Variáveis de ambiente | `DSP_ABOUT_CONFIG_FILE`, `DSP_ABOUT_CONTENT_DIR` |
 
 `AboutConfigService` lê o JSON de índice (`file:`/`classpath:`/caminho puro) e, para cada aba, lê o `.md` correspondente dentro de `contentDir`, montando a resposta; o resultado fica em cache. Se `enabled=false` no índice ou o arquivo de índice não existir, a resposta volta com `enabled=false` e `tabs` vazia — a aplicação não derruba por isso. JSON malformado ou `.md` referenciado ausente resultam em erro 500 (mesmo padrão do `InstallationConfigService`).

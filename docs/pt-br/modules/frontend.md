@@ -1,10 +1,10 @@
-# dsp-frontend
+# rer-dsp-frontend
 
-Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
+Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [rer-dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
 
 ## Objetivo
 
-O `dsp-frontend` é a interface web do DSP: busca por hierarquia territorial, KPIs, mapa interativo e telas de apoio (Geoservices, About).
+O `rer-dsp-frontend` é a interface web do DSP: busca por hierarquia territorial, KPIs, mapa interativo e telas de apoio (Geoservices, About).
 
 ## Responsabilidades
 

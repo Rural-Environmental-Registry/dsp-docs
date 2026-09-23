@@ -21,7 +21,7 @@ The DSP is not a single monolith. It combines:
 
 - **Applications** (frontend, backend)
 - **Orchestration and configuration** (core)
-- **Jobs** — migration/sync from the JDBC source (`dsp-job-data-migration`) and pre-generation of download CSV in SeaweedFS object storage (`dsp-job-geo-file-generation`, Compose profile `object-storage`)
+- **Jobs** — migration/sync from the JDBC source (`rer-dsp-job-data-migration`) and pre-generation of download CSV in SeaweedFS object storage (`rer-dsp-job-geo-file-generation`, Compose profile `object-storage`)
 - **Data infrastructure** (PostgreSQL/PostGIS, GeoServer)
 
 The goal is to **share geospatial data** reliably, with a synchronized base from the adopter JDBC source — in the [RER](https://www.digitalpublicgoods.net/r/rural-environmental-registry-registration-module) ecosystem, that data is typically rural environmental data, but the architecture does not depend on that specific domain (see [What is the DSP?](../what-is-the-dsp.md)).
@@ -103,8 +103,8 @@ All HTTP traffic enters through the **gateway**. Frontend, backend, and both Geo
 | Principle | Description |
 |-----------|-------------|
 | Separation by repository | Each capability evolves and versions independently |
-| Documented source of truth | This wiki (`dsp-docs`) is the cross-cutting reference |
-| Core as orchestrator | Configuration, schema, and local stack startup come from `dsp-core` |
+| Documented source of truth | This wiki (`rer-dsp-docs`) is the cross-cutting reference |
+| Core as orchestrator | Configuration, schema, and local stack startup come from `rer-dsp-core` |
 | External configuration | Table/column mappings and UI labels live in files, not hardcoded |
 
 ---
@@ -153,29 +153,29 @@ flowchart TB
 
 | Layer | Components | Responsibility |
 |--------|-------------|-----------------------|
-| Orchestration / configuration | [dsp-core](https://github.com/Rural-Environmental-Registry/dsp-core) | Starts databases, GeoServers, gateway, and jobs (migration and geo-file); orchestrates build/config of other modules via Docker Compose |
+| Orchestration / configuration | [rer-dsp-core](https://github.com/Rural-Environmental-Registry/rer-dsp-core) | Starts databases, GeoServers, gateway, and jobs (migration and geo-file); orchestrates build/config of other modules via Docker Compose |
 | HTTP entry | Gateway nginx (`dsp-gateway`, in core) | Single entry point: routes to frontend, backend, and GeoServers; optional cache |
-| Presentation | [dsp-frontend](https://github.com/Rural-Environmental-Registry/dsp-frontend) | Web/maps UI for query and sharing |
-| API | [dsp-backend](https://github.com/Rural-Environmental-Registry/dsp-backend) | REST contracts, platform business data |
-| Integration / ETL | [dsp-job-data-migration](https://github.com/Rural-Environmental-Registry/dsp-job-data-migration) | Syncs attributes and geometry from the adopter source to DSP databases |
-| Download files | [dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md) | Reads geometries in `geoserver-db`, generates territorial CSV, writes to object storage (schedule defined in setup) |
+| Presentation | [rer-dsp-frontend](https://github.com/Rural-Environmental-Registry/rer-dsp-frontend) | Web/maps UI for query and sharing |
+| API | [rer-dsp-backend](https://github.com/Rural-Environmental-Registry/rer-dsp-backend) | REST contracts, platform business data |
+| Integration / ETL | [rer-dsp-job-data-migration](https://github.com/Rural-Environmental-Registry/rer-dsp-job-data-migration) | Syncs attributes and geometry from the adopter source to DSP databases |
+| Download files | [rer-dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md) | Reads geometries in `geoserver-db`, generates territorial CSV, writes to object storage (schedule defined in setup) |
 | Object storage | SeaweedFS (`dsp-object-storage`, profile `object-storage`) | S3-compatible API; stores pre-generated CSVs the backend serves when they exist (local demo without JDBC usually omits this service) |
 | Geo publication | GeoServer Exhibition + GeoServer Download | Exhibition: map WMS/WFS; Download: export WFS (same geoserver-db) |
 | Persistence | PostgreSQL / PostGIS (2 databases in Compose) | `dsp-db` (business + one Spring Batch schema per job) and `dsp-geoserver-db` (geometries) |
-| Documentation | [dsp-docs](https://github.com/Rural-Environmental-Registry/dsp-docs) (this wiki) | Onboarding and cross-cutting standards for all repositories |
+| Documentation | [rer-dsp-docs](https://github.com/Rural-Environmental-Registry/rer-dsp-docs) (this wiki) | Onboarding and cross-cutting standards for all repositories |
 
 ---
 
 ## The core as orchestration layer
 
-`dsp-core` contains no application/domain code — its responsibility is exclusively **orchestration and configuration**:
+`rer-dsp-core` contains no application/domain code — its responsibility is exclusively **orchestration and configuration**:
 
 - Starts the 2 Postgres/PostGIS databases, GeoServers (Exhibition + Download), nginx gateway, and migration and geo-file jobs via Docker Compose. Migration watermark in the `data_migration` schema on `dsp-db`.
 - From the `./config.sh` wizard (6 question-driven steps; About on 6/6, optional), generates `adopter-config.yaml` and operational files (`installationConfig.json`, `mapLayersConfig.json`, `downloadThemesConfig.json`, `application.yaml`).
 - Orchestrates build and startup of backend, frontend, migration job, and geo-file job.
 - Has no runtime dependency on other modules — it needs them only at build/orchestration time.
 
-Full operational detail: [dsp-core](../modules/core.md).
+Full operational detail: [rer-dsp-core](../modules/core.md).
 
 ---
 

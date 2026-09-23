@@ -21,8 +21,8 @@ A raiz (`/`) redireciona conforme o idioma do navegador (`pt*` → pt-BR; `en*` 
 ### 1. Clonar e entrar no repositório
 
 ```bash
-git clone https://github.com/Rural-Environmental-Registry/dsp-docs.git
-cd dsp-docs
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-docs.git
+cd rer-dsp-docs
 ```
 
 ### 2. Criar o ambiente e instalar dependências

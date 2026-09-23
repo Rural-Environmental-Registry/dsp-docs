@@ -15,55 +15,55 @@ This guide is **only to see the DSP running** on your machine: it starts a local
 | Docker | 24+ with Compose v2 |
 | Python | 3 |
 
-`dsp-core` orchestrates building other modules via Docker. If a sibling repository is missing, scripts offer to clone it automatically.
+`rer-dsp-core` orchestrates building other modules via Docker. If a sibling repository is missing, scripts offer to clone it automatically.
 
 ## Step 1 — Organize repositories
 
-The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level** — `dsp-core` expects other modules at `../dsp-backend`, `../dsp-frontend`, etc.
+The DSP is split into **sibling repositories** on GitHub. We recommend creating a `rer-dsp` folder and cloning everything **at the same level** — `rer-dsp-core` expects other modules at `../rer-dsp-backend`, `../rer-dsp-frontend`, etc.
 
 #### Option A — simplest flow (recommended)
 
 Create the folder, clone only the core, and enter it. The `./config.sh`, `./setup.sh`, and `./start.sh` scripts detect missing sibling repositories and offer to clone them automatically next to the core:
 
 ```bash
-mkdir dsp && cd dsp
-git clone https://github.com/Rural-Environmental-Registry/dsp-core.git
-cd dsp-core
+mkdir rer-dsp && cd rer-dsp
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-core.git
+cd rer-dsp-core
 ```
 
 After you accept automatic cloning in the scripts, the typical tree looks like this:
 
 ```text
-dsp/
-├── dsp-core/          ← you work here (config.sh, setup.sh, start.sh)
-├── dsp-backend/
-├── dsp-frontend/
-├── dsp-job-data-migration/
-└── dsp-job-geo-file-generation/
+rer-dsp/
+├── rer-dsp-core/          ← you work here (config.sh, setup.sh, start.sh)
+├── rer-dsp-backend/
+├── rer-dsp-frontend/
+├── rer-dsp-job-data-migration/
+└── rer-dsp-job-geo-file-generation/
 ```
 
 #### Option B — manual clone
 
-Clone all application repositories as sibling folders inside `dsp`:
+Clone all application repositories as sibling folders inside `rer-dsp`:
 
 ```bash
-mkdir dsp && cd dsp
-git clone https://github.com/Rural-Environmental-Registry/dsp-core.git
-git clone https://github.com/Rural-Environmental-Registry/dsp-backend.git
-git clone https://github.com/Rural-Environmental-Registry/dsp-frontend.git
-git clone https://github.com/Rural-Environmental-Registry/dsp-job-data-migration.git
-git clone https://github.com/Rural-Environmental-Registry/dsp-job-geo-file-generation.git
+mkdir rer-dsp && cd rer-dsp
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-core.git
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-backend.git
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-frontend.git
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-job-data-migration.git
+git clone https://github.com/Rural-Environmental-Registry/rer-dsp-job-geo-file-generation.git
 ```
 
 Result:
 
 ```text
-dsp/
-├── dsp-core/
-├── dsp-backend/
-├── dsp-frontend/
-├── dsp-job-data-migration/
-└── dsp-job-geo-file-generation/
+rer-dsp/
+├── rer-dsp-core/
+├── rer-dsp-backend/
+├── rer-dsp-frontend/
+├── rer-dsp-job-data-migration/
+└── rer-dsp-job-geo-file-generation/
 ```
 
 ## Step 2 — Enter the core
@@ -71,7 +71,7 @@ dsp/
 If you are not already inside the core:
 
 ```bash
-cd dsp/dsp-core
+cd rer-dsp/rer-dsp-core
 ```
 
 Core scripts create `.env` the first time you run setup — you do not need to create that file manually.
@@ -118,5 +118,5 @@ With `./start.sh` finished and containers running, open **http://localhost:8026/
 |----------|--------|
 | Understand the full architecture | [Architecture — Overview](../architecture/overview.md) |
 | Install with real organization data | [Full installation](full-installation.md) |
-| Detail the migration job | [dsp-job-data-migration — Overview](../modules/job-data-migration/overview.md) |
-| Understand download pre-generation (real adopter) | [dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md) |
+| Detail the migration job | [rer-dsp-job-data-migration — Overview](../modules/job-data-migration/overview.md) |
+| Understand download pre-generation (real adopter) | [rer-dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md) |

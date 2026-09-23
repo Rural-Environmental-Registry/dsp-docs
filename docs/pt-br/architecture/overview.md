@@ -21,7 +21,7 @@ O DSP não é um único monólito. Ele combina:
 
 - **Aplicações** (frontend, backend)
 - **Orquestração e configuração** (core)
-- **Jobs** — migração/sincronização da fonte JDBC (`dsp-job-data-migration`) e pré-geração de CSV de download no object storage SeaweedFS (`dsp-job-geo-file-generation`, profile Compose `object-storage`)
+- **Jobs** — migração/sincronização da fonte JDBC (`rer-dsp-job-data-migration`) e pré-geração de CSV de download no object storage SeaweedFS (`rer-dsp-job-geo-file-generation`, profile Compose `object-storage`)
 - **Infraestrutura de dados** (PostgreSQL/PostGIS, GeoServer)
 
 O objetivo é **compartilhar dados geoespaciais** de forma confiável, com base sincronizada a partir da fonte JDBC do adotante — no ecossistema [RER](https://www.digitalpublicgoods.net/r/rural-environmental-registry-registration-module), esses dados são tipicamente ambientais rurais, mas a arquitetura não depende desse domínio específico (veja [O que é o DSP?](../what-is-the-dsp.md)).
@@ -103,8 +103,8 @@ Todo o tráfego HTTP entra pelo **gateway**. Frontend, backend e os dois GeoServ
 | Princípio | Descrição |
 |-----------|-----------|
 | Separação por repositório | Cada capacidade evolui e versiona de forma independente |
-| Source of truth documentada | Esta wiki (`dsp-docs`) é a referência transversal |
-| Core como orquestrador | Configuração, schema e subida da stack local partem do `dsp-core` |
+| Source of truth documentada | Esta wiki (`rer-dsp-docs`) é a referência transversal |
+| Core como orquestrador | Configuração, schema e subida da stack local partem do `rer-dsp-core` |
 | Configuração externa | Mapeamentos de tabela/coluna e labels da UI ficam em arquivo, não hardcoded |
 
 ---
@@ -153,29 +153,29 @@ flowchart TB
 
 | Camada | Componentes | Responsabilidade                                                                      |
 |--------|-------------|---------------------------------------------------------------------------------------|
-| Orquestração / configuração | [dsp-core](https://github.com/Rural-Environmental-Registry/dsp-core) | Sobe bancos, GeoServers, gateway e os jobs (migração e geo-file); orquestra build/config dos demais módulos via Docker Compose |
+| Orquestração / configuração | [rer-dsp-core](https://github.com/Rural-Environmental-Registry/rer-dsp-core) | Sobe bancos, GeoServers, gateway e os jobs (migração e geo-file); orquestra build/config dos demais módulos via Docker Compose |
 | Entrada HTTP | Gateway nginx (`dsp-gateway`, no core) | Porta de entrada única: roteia para frontend, backend e GeoServers; cache opcional |
-| Apresentação | [dsp-frontend](https://github.com/Rural-Environmental-Registry/dsp-frontend) | Interface web/mapas para consulta e compartilhamento                                  |
-| API | [dsp-backend](https://github.com/Rural-Environmental-Registry/dsp-backend) | Contratos REST, dados de negócio da plataforma                                        |
-| Integração / ETL | [dsp-job-data-migration](https://github.com/Rural-Environmental-Registry/dsp-job-data-migration) | Sincroniza atributos e geometria da fonte do adotante para os bancos do DSP           |
-| Arquivos de download | [dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md) | Lê geometrias no `geoserver-db`, gera CSV territorial e grava no object storage (agenda definida no setup) |
+| Apresentação | [rer-dsp-frontend](https://github.com/Rural-Environmental-Registry/rer-dsp-frontend) | Interface web/mapas para consulta e compartilhamento                                  |
+| API | [rer-dsp-backend](https://github.com/Rural-Environmental-Registry/rer-dsp-backend) | Contratos REST, dados de negócio da plataforma                                        |
+| Integração / ETL | [rer-dsp-job-data-migration](https://github.com/Rural-Environmental-Registry/rer-dsp-job-data-migration) | Sincroniza atributos e geometria da fonte do adotante para os bancos do DSP           |
+| Arquivos de download | [rer-dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md) | Lê geometrias no `geoserver-db`, gera CSV territorial e grava no object storage (agenda definida no setup) |
 | Object storage | SeaweedFS (`dsp-object-storage`, profile `object-storage`) | API compatível com S3; armazena os CSV pré-gerados que o backend entrega quando existirem (demo local sem JDBC costuma omitir este serviço) |
 | Publicação geo | GeoServer Exhibition + GeoServer Download | Exhibition: WMS/WFS de mapa; Download: WFS de exportação (mesmo geoserver-db) |
 | Persistência | PostgreSQL / PostGIS (2 bancos no Compose) | `dsp-db` (negócio + um schema Spring Batch por job) e `dsp-geoserver-db` (geometrias) |
-| Documentação | [dsp-docs](https://github.com/Rural-Environmental-Registry/dsp-docs) (esta wiki) | Onboarding e padrões transversais de todos os repositórios                            |
+| Documentação | [rer-dsp-docs](https://github.com/Rural-Environmental-Registry/rer-dsp-docs) (esta wiki) | Onboarding e padrões transversais de todos os repositórios                            |
 
 ---
 
 ## O core como camada de orquestração
 
-O `dsp-core` não contém código de aplicação/domínio — sua responsabilidade é exclusivamente de **orquestração e configuração**:
+O `rer-dsp-core` não contém código de aplicação/domínio — sua responsabilidade é exclusivamente de **orquestração e configuração**:
 
 - Sobe os 2 bancos Postgres/PostGIS, os GeoServers (Exhibition + Download), o gateway nginx e os jobs de migração e geo-file via Docker Compose. Watermark da migração no schema `data_migration` do `dsp-db`.
 - Gera, a partir do wizard `./config.sh` (6 etapas guiadas por perguntas; About na 6/6, opcional), o `adopter-config.yaml` e os arquivos operacionais (`installationConfig.json`, `mapLayersConfig.json`, `downloadThemesConfig.json`, `application.yaml`).
 - Orquestra o build e a subida do backend, frontend, job de migração e job geo-file.
 - Não tem dependência de runtime sobre os demais módulos — precisa deles apenas no momento do build/orquestração.
 
-Detalhe operacional completo: [dsp-core](../modules/core.md).
+Detalhe operacional completo: [rer-dsp-core](../modules/core.md).
 
 ---
 
