@@ -1,6 +1,6 @@
-# rer-dsp-job-data-migration — Migração de camadas genéricas
+# dsp-job-data-migration — Migração de camadas genéricas
 
-Guia didático do módulo de **camadas geográficas** (`batch.layers`) do job [`rer-dsp-job-data-migration`](overview.md). Visão geral do job: [Visão geral](overview.md).
+Guia didático do módulo de **camadas geográficas** (`batch.layers`) do job [`dsp-job-data-migration`](overview.md). Visão geral do job: [Visão geral](overview.md).
 
 ---
 
@@ -256,7 +256,7 @@ parallelization:
 
 ## Como executar
 
-Na raiz do repositório `rer-dsp-job-data-migration`:
+Na raiz do repositório `dsp-job-data-migration`:
 
 ```bash
 # 1. Metadados Spring Batch no banco de destino (uma vez)
@@ -352,7 +352,7 @@ Logs úteis (pacote `br.car.dsp_batch`):
 
 ---
 
-## No wizard do rer-dsp-core
+## No wizard do dsp-core
 
 No estágio **2/6** (`etl.layers[]` do `adopter-config.yaml`), cada camada é configurada **uma vez** e alimenta migração, mapa e downloads:
 
@@ -368,7 +368,7 @@ A mesma `source_table` pode repetir com **`layer_name` diferente**; o wizard rea
 
 Para desligar uma camada no fluxo do wizard, **remova-a** de `etl.layers[]` e reaplique `./config.sh` — o campo `enabled` não é aceito no `adopter-config.yaml`.
 
-Detalhe completo do wizard: [rer-dsp-core](../core.md#configsh).
+Detalhe completo do wizard: [dsp-core](../core.md#configsh).
 
 ---
 

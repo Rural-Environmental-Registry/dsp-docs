@@ -58,16 +58,16 @@ nav = [
     ]
   },
   { "Module reference" = [
-      { "rer-dsp-core" = "modules/core.md" },
-      { "rer-dsp-backend" = "modules/backend.md" },
-      { "rer-dsp-frontend" = "modules/frontend.md" },
-      { "rer-dsp-job-data-migration" = [
+      { "dsp-core" = "modules/core.md" },
+      { "dsp-backend" = "modules/backend.md" },
+      { "dsp-frontend" = "modules/frontend.md" },
+      { "dsp-job-data-migration" = [
           { "Overview" = "modules/job-data-migration/overview.md" },
           { "Generic layer migration" = "modules/job-data-migration/generic-layers.md" },
           { "Post-migration validation" = "modules/job-data-migration/post-migration-validation.md" },
         ]
       },
-      { "rer-dsp-job-geo-file-generation" = [
+      { "dsp-job-geo-file-generation" = [
           { "Overview" = "modules/job-geo-file-generation/overview.md" },
         ]
       },

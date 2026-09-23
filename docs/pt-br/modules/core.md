@@ -1,18 +1,18 @@
-# rer-dsp-core
+# dsp-core
 
-Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [rer-dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
+Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
 
 ## Objetivo
 
-O `rer-dsp-core` é o hub de orquestração Docker Compose do DSP. Ele **não contém código de aplicação/domínio** — sua responsabilidade é preparar e subir a infraestrutura (bancos, GeoServers, gateway, jobs de migração e geo-file) e orquestrar o build dos demais módulos.
+O `dsp-core` é o hub de orquestração Docker Compose do DSP. Ele **não contém código de aplicação/domínio** — sua responsabilidade é preparar e subir a infraestrutura (bancos, GeoServers, gateway, jobs de migração e geo-file) e orquestrar o build dos demais módulos.
 
 ```mermaid
 flowchart TD
-  core["rer-dsp-core"]
-  be["rer-dsp-backend"]
-  fe["rer-dsp-frontend"]
-  job["rer-dsp-job-data-migration"]
-  geoFile["rer-dsp-job-geo-file-generation"]
+  core["dsp-core"]
+  be["dsp-backend"]
+  fe["dsp-frontend"]
+  job["dsp-job-data-migration"]
+  geoFile["dsp-job-geo-file-generation"]
   storage["dsp-object-storage (SeaweedFS)"]
   gs["2 GeoServers + 2 bancos Postgres/PostGIS"]
   gw["dsp-gateway"]
@@ -63,7 +63,7 @@ Wizard interativo que grava `config/adopter/adopter-config.yaml` e, na reaplica�
 
 Esses artefatos operacionais **não devem ser editados manualmente** — são derivados e **regenerados** a cada reaplicação de `./config.sh`. Ajuste sempre `config/adopter/adopter-config.yaml` (wizard ou editor) e depois reaplique.
 
-Rodar sem argumentos (`./config.sh`). Antes do wizard, o script confere os repositórios irmãos (`rer-dsp-backend`, `rer-dsp-frontend`, `rer-dsp-job-data-migration`, `rer-dsp-job-geo-file-generation`) e oferece clonar o que faltar.
+Rodar sem argumentos (`./config.sh`). Antes do wizard, o script confere os repositórios irmãos (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`) e oferece clonar o que faltar.
 
 O wizard **não** pergunta horário de job batch nem grava `DSP_MIGRATION_CRON` ou `DSP_GEO_FILE_GENERATION_CRON`. Reaplicar (opção **1**) não altera crons no `.env`.
 
@@ -203,7 +203,7 @@ Use **depois** do `./setup.sh`. Não roda migração, seed, populate de GeoServe
 | Passo do script | O que faz |
 |-----------------|-----------|
 | 1 — Pré-requisitos | Docker; cria/valida `.env` |
-| 2 — Repositórios | Confere `rer-dsp-backend` e `rer-dsp-frontend` (`DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH`, padrão `../…`) |
+| 2 — Repositórios | Confere `dsp-backend` e `dsp-frontend` (`DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH`, padrão `../…`) |
 | 3 — Config em disco | Exige `installation-config.json`, `mapLayersConfig.json` e `downloadThemesConfig.json` (válidos; tipicamente gerados pelo `./config.sh` ou quickstart na demo) |
 | 4 — Infraestrutura | **Só verifica** se os containers esperados já estão rodando (falha com hint se não). Demo: dois bancos + dois GeoServers. Adotante real: o mesmo núcleo +, conforme o `.env`, job de migração, `dsp-object-storage` e job geo-file |
 | 5 — URL do site | Mostra a URL pública do frontend (`dsp_public_base_url` + `VITE_BASE_URL`) |
@@ -366,4 +366,4 @@ flowchart LR
 - **Imagens `dsp-backend`, GeoServers, `dsp-job-migration`, bancos e `dsp-gateway`** — configs e SQL de init copiados no build via `dsp_config`; volumes guardam só dados (e cache do gateway).
 - **Imagem `dsp-object-storage`** — SeaweedFS (`weed mini`) com credenciais em `s3.json` na imagem. Volume `dsp_object_storage_data` guarda os objetos; tamanho e quantidade de volumes internos são calculados pelo `weed mini` conforme o espaço livre no volume Docker.
 
-Veja também: [Fluxo de dados](../architecture/data-flow.md) (runtime) e [rer-dsp-backend](backend.md) (variáveis de ambiente de downloads).
+Veja também: [Fluxo de dados](../architecture/data-flow.md) (runtime) e [dsp-backend](backend.md) (variáveis de ambiente de downloads).
