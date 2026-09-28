@@ -360,7 +360,7 @@ flowchart LR
 - **`select-runtime-config.sh`** — on Docker build, picks active file or `.example` and copies to `/config` inside the image.
 - **`installation-config.json`** — labels, hierarchy, screens, KPIs, and `screens.home.detail.fields` (`DSP_INSTALLATION_CONFIG_FILE`). That array does **not** go to the job `application.yaml`.
 - **`mapLayersConfig.json`** — WMS groups and layers; published on GeoServers by `populate_geoserver.sh`.
-- **`downloadThemesConfig.json`** — download themes (AOI + `etl.layers[]`); `wfsBaseUrl` at `${DSP_PUBLIC_BASE_URL}/geoserver-download/dsp/wfs`.
+- **`downloadThemesConfig.json`** — download themes (AOI + `etl.layers[]`); `formats` is `csv` and `gpkg`; `wfsBaseUrl` at `${DSP_PUBLIC_BASE_URL}/geoserver-download/dsp/wfs`.
 - **`about-config.json`** — About index (`enabled`, `bannerTitle`, `tabs` with ids `tab-1`, `tab-2`, …).
 - **`application.yaml`** — ETL plan. Copied to job image at build (with entrypoint and GeoServer publish scripts).
 - **`config/Job-Geo-File-Generation/application/application.yaml`** — S3 for pre-generation job (no cron; schedule only in `.env` via `./setup.sh`).

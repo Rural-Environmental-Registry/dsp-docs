@@ -71,7 +71,8 @@ Endpoints consumed by the frontend:
 | `GET /config/installation` | Labels, hierarchy, screens, KPIs, and `screens.home.detail.fields` |
 | `GET /downloads/themes` | Download themes |
 | `POST /downloads/search` | Search items by hierarchy/theme |
-| `GET /downloads/file` | CSV file download via backend |
+| `GET /downloads/file` | CSV or GPKG file download via backend |
+| `GET /downloads/features-bundle` | Area-of-interest ZIP (`aoiId` and `format` `csv` or `gpkg`) |
 | `GET /map/getBaseMaps` | Base maps |
 | `GET /map/getLayers` | Map layers |
 | `GET /geoServices/getRegions` | Regions |

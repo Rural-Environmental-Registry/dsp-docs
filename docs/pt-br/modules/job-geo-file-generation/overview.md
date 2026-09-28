@@ -22,7 +22,7 @@ Job batch do [DSP](../../index.md) que **pré-gera arquivos de download territor
 
 | Entrada | Saída |
 |---------|--------|
-| Flags em `dsp.territory_level_2` / `_3` | CSV (v1) no bucket S3 |
+| Flags em `dsp.territory_level_2` / `_3` | CSV e GeoPackage no bucket S3 |
 | Feições em `dsp-geoserver-db` (mesma base do WFS) | Metadados `generated-at` no objeto |
 | `downloadThemesConfig.json` | Flags desligadas + `last_generated_s3_file_at` por território |
 
@@ -50,7 +50,7 @@ flowchart LR
 
   job -->|lê flags pendentes| dsp
   job -->|lê geom / atributos| geo
-  job -->|grava CSV| s3
+  job -->|grava CSV e GPKG| s3
   job -->|grava batch + limpa flags| dsp
 ```
 
@@ -93,7 +93,8 @@ O nome do arquivo que o cidadão baixa na UI **não** é a chave do objeto — o
 
 ## Formatos e temas
 
-- **v1:** CSV no mesmo layout do WFS (`FID`, atributos na ordem da tabela, geometria em WKT).
+- **CSV:** mesmo layout do WFS (`FID`, atributos na ordem da tabela, geometria em WKT).
+- **GeoPackage (`.gpkg`):** gerado quando o tema declara `gpkg` em `formats[]`. Uma tabela de feições por arquivo, com o código do tema, geometria em `the_geom` (WKB). O SRID vem da camada. Sem SRID, a geometria fica no SRS geográfico indefinido do GeoPackage (`srs_id` 0); a coluna não aceita valor vazio. Feição sem geometria é ignorada. O backend não tem fallback WFS para esse formato.
 - Novo formato: implementar `GeoFileExporter` e declarar em `formats[]` do tema — chaves e endpoints do backend permanecem.
 
 Temas e códigos vêm de `downloadThemesConfig.json` (gerado pelo `./config.sh` a partir do adotante).
