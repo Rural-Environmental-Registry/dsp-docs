@@ -96,7 +96,7 @@ The wizard is split into **6 stages**. In each, the operator answers guided ques
 | **2 — Tables, columns, and layers** | For L1/L2/L3/AOI: table, PK (**one** column; composite not supported), `parent_key` (L2/L3), name, geometry, SRID, `created_at_column` (required), `updated_at_column` (optional), `where_clause`. On AOI: `territory_level_3_column`, `additional_columns`. Generic layers in `etl.layers[]` (ETL + map + downloads in one block) | ETL plan, `mapLayersConfig.json`, and `downloadThemesConfig.json`. Extra layers: [Generic layer migration](job-data-migration/generic-layers.md) |
 | **3 — Application** | Area-of-interest KPI label (`area_of_interest`), date and date-time formats | Dashboard, listings, and detail |
 | **4 — Interface** | Hierarchy labels, screen titles, AOI detail panel fields, `map.initialView` (`territorial_bbox` / `manual` / `planet`), groups and styles for fixed map layers | Frontend, layer selector, and styles published on GeoServer |
-| **5 — KPIs** | Card colors, AOI area unit, count and mapping of theme KPIs (0–4) | KPI cards and job calculations |
+| **5 — KPIs** | Card colors, AOI area unit, count and mapping of theme KPIs (0–4) | `kpis` block in `application.yaml`, `THEME_*` cards, and `kpi-job` |
 | **6 — About** (optional) | Enable About page, banner title, tabs (label + `.md` / `.markdown` file; wizard can copy from any folder to `config/about/`) | `about-config.json` + content in `config/about/` |
 
 In the terminal the wizard shows **5 numbered stages** (1–5) plus the optional **About** block at the end — in documentation, About counts as **stage 6**.
@@ -104,6 +104,12 @@ In the terminal the wizard shows **5 numbered stages** (1–5) plus the optional
 **Object storage (SeaweedFS)** is not asked in the wizard. Credentials and endpoint live in `environment.object_storage` in `adopter-config.yaml` (see `adopter-config.yaml.example`); `./config.sh` copies this to `DSP_OBJECT_STORAGE_*` in `.env` on reapply. The geo-file job **schedule** (`DSP_GEO_FILE_GENERATION_CRON`) comes from `./setup.sh`, not this stage.
 
 `./config.sh` (option **2 — edit**) reopens the same 6-stage wizard with current values filled in.
+
+#### Jobs generated automatically
+
+The wizard does **not** ask which fixed jobs to enable. Generated `application.yaml` always turns on L1, L2, L3, area of interest, and `kpi-job`. The `layer-jobs` flag becomes `true` when `etl.layers[]` has entries; otherwise `false`.
+
+The area shown on KPIs does **not** come from the source: `kpiCalculationJob` computes `dsp.area_of_interest.area` and writes themes to `dsp.kpi_measure` after migration. Stage **5** sets `theme_count` (0–4), each theme `layer`, the area unit, and card colors. Detail: [KPI calculation](job-data-migration/overview.md#kpi-calculation).
 
 #### Advanced SQL in `source_table` (fixed levels)
 

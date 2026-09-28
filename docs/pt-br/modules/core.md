@@ -96,7 +96,7 @@ O wizard é dividido em **6 etapas**. Em cada uma, o operador responde perguntas
 | **2 — Tabelas, colunas e camadas** | Para L1/L2/L3/AOI: tabela, PK (**uma** coluna; composta não suportada), `parent_key` (L2/L3), nome, geometria, SRID, `created_at_column` (obrigatório), `updated_at_column` (opcional), `where_clause`. Na AOI: `territory_level_3_column`, `additional_columns`. Camadas genéricas em `etl.layers[]` (ETL + mapa + downloads num único bloco) | Plano ETL, `mapLayersConfig.json` e `downloadThemesConfig.json`. Camadas extras: [Migração de camadas genéricas](job-data-migration/generic-layers.md) |
 | **3 — Aplicação** | Label do KPI de área de interesse (`area_of_interest`), formatos de data e data-hora | Dashboard, listagens e detalhe |
 | **4 — Interface** | Labels da hierarquia, títulos das telas, campos do painel de detalhe da AOI, `map.initialView` (`territorial_bbox` / `manual` / `planet`), grupos e estilos das camadas fixas de mapa | Frontend, seletor de camadas e estilos publicados no GeoServer |
-| **5 — KPIs** | Cores dos cards, unidade de área da AOI, quantidade e mapeamento dos KPIs de tema (0–4) | Cards de KPI e cálculos no job |
+| **5 — KPIs** | Cores dos cards, unidade de área da AOI, quantidade e mapeamento dos KPIs de tema (0–4) | Bloco `kpis` no `application.yaml`, cards `THEME_*` e job `kpi-job` |
 | **6 — About** (opcional) | Habilitar página About, título do banner, abas (label + arquivo `.md` / `.markdown`; o wizard pode copiar de qualquer pasta para `config/about/`) | `about-config.json` + conteúdo em `config/about/` |
 
 No terminal o wizard mostra **5 estágios** numerados (1–5) mais o bloco **About** opcional ao final — na documentação, o About conta como **6ª etapa**.
@@ -104,6 +104,12 @@ No terminal o wizard mostra **5 estágios** numerados (1–5) mais o bloco **Abo
 **Object storage (SeaweedFS)** não é perguntado no wizard. Credenciais e endpoint ficam em `environment.object_storage` no `adopter-config.yaml` (veja `adopter-config.yaml.example`); o `./config.sh` copia isso para `DSP_OBJECT_STORAGE_*` no `.env` na reaplicação. A **agenda** do job geo-file (`DSP_GEO_FILE_GENERATION_CRON`) vem do `./setup.sh`, não desta etapa.
 
 O `./config.sh` (opção **2 — editar**) reabre esse mesmo wizard de 6 etapas com os valores atuais preenchidos.
+
+#### Jobs gerados automaticamente
+
+O wizard **não** pergunta quais jobs fixos ligar. O `application.yaml` gerado habilita sempre L1, L2, L3, área de interesse e `kpi-job`. A flag `layer-jobs` fica `true` quando há entradas em `etl.layers[]`; caso contrário, `false`.
+
+A área exibida nos KPIs **não** vem da origem: o `kpiCalculationJob` calcula `dsp.area_of_interest.area` e grava temas em `dsp.kpi_measure` depois da migração. A etapa **5** define `theme_count` (0–4), a `layer` de cada tema, a unidade de área e as cores. Detalhe: [Cálculo de KPIs](job-data-migration/overview.md#calculo-de-kpis).
 
 #### SQL avançado em `source_table` (níveis fixos)
 

@@ -171,7 +171,7 @@ flowchart TB
 O `dsp-core` não contém código de aplicação/domínio — sua responsabilidade é exclusivamente de **orquestração e configuração**:
 
 - Sobe os 2 bancos Postgres/PostGIS, os GeoServers (Exhibition + Download), o gateway nginx e os jobs de migração e geo-file via Docker Compose. Watermark da migração no schema `data_migration` do `dsp-db`.
-- Gera, a partir do wizard `./config.sh` (6 etapas guiadas por perguntas; About na 6/6, opcional), o `adopter-config.yaml` e os arquivos operacionais (`installationConfig.json`, `mapLayersConfig.json`, `downloadThemesConfig.json`, `application.yaml`).
+- Gera, a partir do wizard `./config.sh` (6 etapas guiadas por perguntas; About na 6/6, opcional), o `adopter-config.yaml` e os arquivos operacionais (`installationConfig.json`, `mapLayersConfig.json`, `downloadThemesConfig.json`, bloco `kpis` e `application.yaml`).
 - Orquestra o build e a subida do backend, frontend, job de migração e job geo-file.
 - Não tem dependência de runtime sobre os demais módulos — precisa deles apenas no momento do build/orquestração.
 

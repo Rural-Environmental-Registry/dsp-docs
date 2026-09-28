@@ -70,9 +70,10 @@ As camadas dependem de `area_of_interest_id` apontar para registros que já exis
 1. Unidades administrativas (level-1 → level-2 → level-3)
 2. Área de interesse (area-of-interest)
 3. Camadas genéricas (layer-jobs)   ← este módulo
+4. Cálculo de KPIs (kpi-job)        ← depois das camadas usadas nos temas
 ```
 
-Na prática, o `JobRunner` dos jobs fixos roda **antes** do runner de camadas (`@Order(1)` e `@Order(2)`).
+Na prática, o `JobRunner` dos jobs fixos roda **antes** do runner de camadas (`@Order(1)` e `@Order(2)`); o `kpiCalculationJob` roda depois (`@Order(3)`). Cada KPI de tema no wizard aponta para o `layer-name` de uma camada migrada aqui.
 
 ---
 

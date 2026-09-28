@@ -137,6 +137,8 @@ The same logical tables exist on **both** Postgres instances (`territory_level_1
 
 The job derives `boundary_box` and `centroid_coordinates` at the source and writes them only to `dsp-db`. Full geometry goes to `geom` on geoserver-db.
 
+The `area` column on `dsp.area_of_interest` and the `dsp.kpi_measure` table exist **only** on `dsp-db` (not on geo-target). Area is **not** part of dual-write: `kpiCalculationJob` computes it from `geom` on geo-target. Theme KPIs are not AOI columns either.
+
 `created_at` on the target is required (watermark base). `updated_at` is populated when the YAML declares `updated-at-column`.
 
 Why not store the whole polygon in `dsp-db`? See the note in [Architecture — Data flow](overview.md#data-flow).
@@ -177,7 +179,7 @@ If migration **fails**, flags do **not** change. More context: [dsp-job-geo-file
 
 | Component | JDBC source | `dsp-db` | `dsp-geoserver-db` | Other |
 |------------|------------|----------|---------------------|--------|
-| Migration job | read | write `dsp` + `data_migration` | write `geom` | — |
+| Migration job | read | write `dsp` + `data_migration`; `area` and `kpi_measure` via kpi-job | write `geom` | — |
 | Geo-file job | — | **read** flags · **write** `geo_file_generation` and update flags | **read** `geom` | **write** CSV to SeaweedFS |
 | Backend | — | **read** / **write** business (`dsp`) | — | **read** S3 · **read** WFS on Download (via API) |
 | GeoServer Exhibition | — | — | **read** layers (WMS/WFS) | — |
@@ -195,6 +197,8 @@ Each delta run performs **one read on the origin** and **two writes to different
 1. Read attributes + geometry from the JDBC source (watermark + `where-clause`).
 2. UPSERT on **`dsp-db`**: attributes + `boundary_box` + `centroid_coordinates` — **without** `geom` column.
 3. UPSERT on **`dsp-geoserver-db`** (separate Postgres): same attributes + **full `geom`**.
+
+`kpiCalculationJob` is not part of this dual-write: after the AOI and layer jobs, it reads geo-target and updates `area` and `kpi_measure` on `dsp-db` only.
 
 ```mermaid
 flowchart LR

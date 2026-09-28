@@ -6,8 +6,8 @@ Checklist e consultas para confirmar que a migração via `dsp-job-data-migratio
 
 | Momento | Objetivo |
 |---------|----------|
-| Após cada job (L1, L2, L3, área de interesse, camadas) | Isolar problemas por nível |
-| Após a sequência completa | Confirmar base pronta para o DSP |
+| Após cada job (L1, L2, L3, área de interesse, camadas, kpi-job) | Isolar problemas por nível |
+| Após a sequência completa (incluindo `kpiCalculationJob`) | Confirmar base pronta para o DSP e KPIs na Home |
 | Antes de liberar GeoServer/API | Evitar publicação de dados incompletos |
 
 ## Checklist rápido
@@ -20,6 +20,9 @@ Checklist e consultas para confirmar que a migração via `dsp-job-data-migratio
 - [ ] Amostra de geometrias com `ST_IsValid` e SRID conforme `srid` do YAML — em ambos os destinos (`dsp-db`: bbox/centroid; `geoserver-db`: `geom`)
 - [ ] FKs de hierarquia resolvidas (se aplicável)
 - [ ] Layer GeoServer aponta para a tabela/view correta
+- [ ] `kpiCalculationJob` com `status = COMPLETED` (quando `kpi-job` habilitado)
+- [ ] `dsp.area_of_interest.area` preenchida onde há geometria no geo-target
+- [ ] `dsp.kpi_measure` coerente com `theme-count` e camadas configuradas
 
 ## 1. Status do Spring Batch
 
@@ -184,7 +187,48 @@ Repita o padrão para level-3 → level-2. AOI: `territory_level_3_id` deve exis
 | Job lento com `thread-pool-size: 1` | Esperado em tabelas grandes |
 | `SKIP` imediato | Sem delta temporal — confirme se a origem realmente mudou depois do watermark |
 
-## 7. GeoServer
+## 7. KPI job (`kpiCalculationJob`)
+
+Confirme a última execução do bean `kpiCalculationJob` (não confundir com a flag kebab-case `kpi-job`):
+
+```sql
+SELECT i.job_name, e.status, e.exit_code, e.start_time, e.end_time
+FROM data_migration.batch_job_execution e
+JOIN data_migration.batch_job_instance i ON e.job_instance_id = i.job_instance_id
+WHERE i.job_name = 'kpiCalculationJob'
+ORDER BY e.job_execution_id DESC
+LIMIT 5;
+```
+
+### Área da AOI (dsp-db)
+
+```sql
+SELECT COUNT(*) AS total,
+       COUNT(area) AS com_area,
+       COUNT(*) FILTER (WHERE area IS NOT NULL AND area > 0) AS area_positiva
+FROM dsp.area_of_interest;
+```
+
+Compare com geometrias válidas no geo-target:
+
+```sql
+SELECT COUNT(*) AS com_geom
+FROM dsp.area_of_interest
+WHERE geom IS NOT NULL AND ST_IsValid(geom);
+```
+
+### Medidas de tema (`kpi_measure`)
+
+```sql
+SELECT kpi_name, COUNT(*) AS registros, SUM(value) AS soma
+FROM dsp.kpi_measure
+GROUP BY kpi_name
+ORDER BY kpi_name;
+```
+
+Com `theme-count: 0`, espere zero linhas após o truncate. Com temas habilitados, cada `kpi_name` deve corresponder ao `layer-name` do YAML e ao `card.layer` no `installation-config.json`.
+
+## 8. GeoServer
 
 | Checagem | Como |
 |----------|------|
@@ -203,5 +247,7 @@ Repita o padrão para level-3 → level-2. AOI: `territory_level_3_id` deve exis
 | FK quebrada entre levels | Ordem invertida ou L1 incompleto | Reexecutar L1 → L2 → L3 |
 | App sobe e encerra "ok" sem dados | Nenhuma flag `true` | Habilitar ao menos um job |
 | Incremental “atrasado” | `updated-at-column` nula ou ausente | Preencher a coluna ou resetar o `sync-key` |
+| Cards de tema vazios ou ausentes na Home | `kpi-job` não rodou, `theme-count` diferente das camadas, ou backend com cache antigo | Conferir `kpiCalculationJob` `COMPLETED`; alinhar `kpis.themes[].layer-name` com as camadas migradas; reiniciar `dsp-backend` após `./config.sh` |
+| Área da AOI zerada ou nula | Geometria ausente/inválida no geo-target ou KPI job não executado | Conferir `geom` em `dsp.area_of_interest` no geoserver-db; rodar `kpi-job` |
 
 Visão do job: [Visão geral](overview.md).

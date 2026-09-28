@@ -169,12 +169,30 @@ Example with planet mode:
 | `screens.home` / `screens.downloads` | Which levels each screen uses and field labels. In `screens.home.detail.fields`, the exclusive AOI detail list (`field` + `label`) |
 | `kpis` | Home cards (labels, units, colors) |
 | `map.initialView` | Map open/reset mode on Home. Required `mode`: `territorial_bbox` (frame via `GET /territory/boundary-box`; if no L1/L2/L3 territorial level is configured in ETL, `./config.sh` writes `planet` explicitly), `manual` (requires `latitude`, `longitude`, `zoom`), or `planet` (always center `[0,0]` zoom `0`) |
-| `areaOfInterest` | Property area unit/label — the area itself comes from the source migration; the DSP does not compute or convert units |
+| `areaOfInterest` | Property area unit/label (`areaUnit`, `optionalLabel`) — the numeric value comes from `dsp.area_of_interest.area`, **computed** by `kpiCalculationJob` from geometry on geo-target |
 | `formats` | Date/time display patterns in the UI |
 
 Between frontend and backend, dates always travel as `yyyy-MM-dd` (date only) or `yyyy-MM-dd'T'HH:mm:ss` (date + time); the UI converts to `formats.date`/`formats.dateTime` for display.
 
 What does **not** go in this file: territorial units (`dsp.territory_level_*` tables + migration job), WMS/GeoServer layers (`GET /map/getBaseMaps` and `GET /map/getLayers`), download catalog (`downloadThemesConfig.json`), and ETL source→destination mapping (migration job `application.yaml`).
+
+## TotalizerService (`POST /totalizer/`)
+
+Configuration (`GET /config/installation`) defines **which** cards appear on Home (`kpis.cards[]`: codes `AREA_OF_INTEREST`, `THEME_1`…`THEME_4`, labels, units, colors, and `layer` on themes). **Values** come from `POST /totalizer/` with an optional territorial filter (`level2Ids`, `level3Ids`).
+
+| Card (`code`) | Aggregation | Source on `dsp-db` |
+|---------------|-------------|--------------------|
+| `AREA_OF_INTEREST` | Property count + sum of `area` | `dsp.area_of_interest` (L2/L3 filter via `territory_level_3_id`) |
+| `THEME_1`…`THEME_4` | Sum of `value` where `kpi_name` = `card.layer` | `dsp.kpi_measure` (same territorial filter) |
+
+Each theme card’s `layer` must match `kpis.themes[].layer-name` in the job `application.yaml` and the table name on geo-target (`dsp.<layer_name>`).
+
+With `theme_count: 0` on the adopter, only the `AREA_OF_INTEREST` card is generated; `kpi_measure` stays empty after the KPI job.
+
+Job detail: [KPI calculation](job-data-migration/overview.md#kpi-calculation).
+
+!!! note "Configuration cache"
+    `InstallationConfigService` keeps the JSON in memory. After `./config.sh`, restart the `dsp-backend` container (or local `./gradlew bootRun`) so new cards or `theme_count` show up in the API. The frontend also caches `GET /config/installation` for the session — hard-refresh if cards changed.
 
 ## Downloads (GeoServer Download WFS)
 

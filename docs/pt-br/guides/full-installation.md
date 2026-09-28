@@ -97,7 +97,7 @@ O fluxo tem **6 etapas** guiadas (a última, About, é opcional):
 | **2** | Tabelas, colunas, SRID e camadas genéricas |
 | **3** | Textos de aplicação, formatos de data |
 | **4** | Interface: hierarquia, telas, mapa, estilos das camadas fixas |
-| **5** | KPIs (cores, unidade de área, temas 0–4) |
+| **5** | KPIs (cores, unidade de área, temas 0–4). A área numérica **não** vem da origem: o `kpiCalculationJob` calcula `dsp.area_of_interest.area` e os temas em `dsp.kpi_measure` depois da migração |
 | **6** | About opcional (abas em Markdown) |
 
 O `./config.sh` grava a **fonte de verdade do adotante** em `config/adopter/adopter-config.yaml` — **este** é o arquivo pensado para edição manual ou importação de YAML pronto. Na reaplicação (wizard ou opção **1 — Reaplicar**), o `./config.sh` **gera os arquivos operacionais** consumidos pelo backend, GeoServers e jobs. **Não edite esses operacionais à mão:** eles são sobrescritos a cada `./config.sh`.
