@@ -147,10 +147,10 @@ Why not store the whole polygon in `dsp-db`? See the note in [Architecture — D
 
 | Schema | Job | What is persisted |
 |--------|-----|----------------|
-| `data_migration` | `rer-dsp-job-data-migration` | `BATCH_*` history and watermark in `BATCH_JOB_EXECUTION_SYNC_STATE` (advances only after `COMPLETED`) |
-| `geo_file_generation` | `rer-dsp-job-geo-file-generation` | `BATCH_*` history from pre-generation runs |
+| `data_migration` | `dsp-job-data-migration` | `BATCH_*` history and watermark in `BATCH_JOB_EXECUTION_SYNC_STATE` (advances only after `COMPLETED`) |
+| `geo_file_generation` | `dsp-job-geo-file-generation` | `BATCH_*` history from pre-generation runs |
 
-Init SQL for these schemas comes from `rer-dsp-core` (`dsp-db` and job images). Operational detail: [rer-dsp-core](../modules/core.md).
+Init SQL for these schemas comes from `dsp-core` (`dsp-db` and job images). Operational detail: [dsp-core](../modules/core.md).
 
 ---
 
@@ -169,7 +169,7 @@ Summary flow:
 2. If the run ends **`COMPLETED`**, it marks territories affected in the same time window (`requires_s3_file_regeneration = true`). On first load, it marks the relevant territorial set.
 3. Geo-file, on the schedule configured in setup, processes only pending items, publishes to SeaweedFS, and clears the flag per territory when all formats finish.
 
-If migration **fails**, flags do **not** change. More context: [rer-dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md).
+If migration **fails**, flags do **not** change. More context: [dsp-job-geo-file-generation](../modules/job-geo-file-generation/overview.md).
 
 ---
 

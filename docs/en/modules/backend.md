@@ -1,10 +1,10 @@
-# rer-dsp-backend
+# dsp-backend
 
-This module is part of the [DSP](../index.md) — see the full documentation in [rer-dsp-docs](../index.md). The information below covers this module only.
+This module is part of the [DSP](../index.md) — see the full documentation in [dsp-docs](../index.md). The information below covers this module only.
 
 ## Purpose
 
-The `rer-dsp-backend` is the DSP REST API: it exposes business data, territorial hierarchy, downloads, and map configuration to the frontend and other consumers.
+The `dsp-backend` is the DSP REST API: it exposes business data, territorial hierarchy, downloads, and map configuration to the frontend and other consumers.
 
 ## Responsibilities
 
@@ -30,7 +30,7 @@ The `rer-dsp-backend` is the DSP REST API: it exposes business data, territorial
 ./gradlew bootRun
 ```
 
-Or via Docker, orchestrated by `rer-dsp-core` — which offers two modes: [demo](../guides/quick-start.md) (synthetic seed, no external database) or [full installation](../guides/full-installation.md) (adopter data via JDBC source). In Docker the container does not publish a port on the host: the API is reached through the core gateway at `/dsp-backend`.
+Or via Docker, orchestrated by `dsp-core` — which offers two modes: [demo](../guides/quick-start.md) (synthetic seed, no external database) or [full installation](../guides/full-installation.md) (adopter data via JDBC source). In Docker the container does not publish a port on the host: the API is reached through the core gateway at `/dsp-backend`.
 
 ## Environment variables
 
@@ -77,7 +77,7 @@ Territorial **data** (L1/L2/L3 units) lives in tables `dsp.territory_level_*`. T
 
 | Item | Value |
 |------|--------|
-| Default file | `rer-dsp-backend/src/main/resources/installationConfig.json` |
+| Default file | `dsp-backend/src/main/resources/installationConfig.json` |
 | Property | `dsp.installation-config.file` |
 | Environment variable | `DSP_INSTALLATION_CONFIG_FILE` |
 
@@ -199,8 +199,8 @@ Institutional About page content can be configured by the adopter via index file
 
 | Item | Value |
 |------|--------|
-| Property (index) | `dsp.about-config.config-file`, default `file:../rer-dsp-core/config/about/about-config.json` |
-| Property (content) | `dsp.about-config.content-dir`, default `file:../rer-dsp-core/config/about/` |
+| Property (index) | `dsp.about-config.config-file`, default `file:../dsp-core/config/about/about-config.json` |
+| Property (content) | `dsp.about-config.content-dir`, default `file:../dsp-core/config/about/` |
 | Environment variables | `DSP_ABOUT_CONFIG_FILE`, `DSP_ABOUT_CONTENT_DIR` |
 
 `AboutConfigService` reads the index JSON (`file:`/`classpath:`/plain path) and, for each tab, reads the corresponding `.md` inside `contentDir`, building the response; the result is cached. If `enabled=false` in the index or the index file is missing, the response has `enabled=false` and empty `tabs` — the application does not fail for that. Malformed JSON or a missing referenced `.md` results in a 500 error (same pattern as `InstallationConfigService`).

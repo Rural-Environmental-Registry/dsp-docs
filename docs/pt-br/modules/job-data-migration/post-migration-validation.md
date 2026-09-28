@@ -1,6 +1,6 @@
-# rer-dsp-job-data-migration — Validação pós-migração
+# dsp-job-data-migration — Validação pós-migração
 
-Checklist e consultas para confirmar que a migração via `rer-dsp-job-data-migration` concluiu com sucesso e que o destino está consistente.
+Checklist e consultas para confirmar que a migração via `dsp-job-data-migration` concluiu com sucesso e que o destino está consistente.
 
 ## Quando validar
 

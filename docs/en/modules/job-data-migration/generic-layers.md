@@ -1,6 +1,6 @@
-# rer-dsp-job-data-migration — Generic layer migration
+# dsp-job-data-migration — Generic layer migration
 
-Tutorial guide for the **geographic layers** module (`batch.layers`) of the [`rer-dsp-job-data-migration`](overview.md) job. Job overview: [Overview](overview.md).
+Tutorial guide for the **geographic layers** module (`batch.layers`) of the [`dsp-job-data-migration`](overview.md) job. Job overview: [Overview](overview.md).
 
 ---
 
@@ -256,7 +256,7 @@ parallelization:
 
 ## How to run
 
-At the root of the `rer-dsp-job-data-migration` repository:
+At the root of the `dsp-job-data-migration` repository:
 
 ```bash
 # 1. Spring Batch metadata on destination database (once)
@@ -352,7 +352,7 @@ Useful logs (package `br.car.dsp_batch`):
 
 ---
 
-## In the rer-dsp-core wizard
+## In the dsp-core wizard
 
 In stage **2/6** (`etl.layers[]` in `adopter-config.yaml`), each layer is configured **once** and feeds migration, map, and downloads:
 
@@ -368,7 +368,7 @@ The same `source_table` can repeat with a **different** `layer_name`; the wizard
 
 To turn off a layer in the wizard flow, **remove** it from `etl.layers[]` and reapply `./config.sh` — `enabled` is not accepted in `adopter-config.yaml`.
 
-Full wizard detail: [rer-dsp-core](../core.md#configsh).
+Full wizard detail: [dsp-core](../core.md#configsh).
 
 ---
 
