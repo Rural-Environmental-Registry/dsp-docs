@@ -111,3 +111,5 @@ Depois, push em `main` dispara o workflow [Documentation](.github/workflows/docs
 ## Licença
 
 GPL-3.0 — Rural Environmental Registry
+
+<small><strong>Copyright © 2026 Government of Brazil — Ministry of Management and Innovation in Public Services</strong></small>

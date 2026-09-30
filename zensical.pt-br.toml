@@ -35,7 +35,7 @@ site_author = "Rural Environmental Registry"
 #
 # Read more: https://zensical.org/docs/setup/basics/#copyright
 copyright = """
-Rural Environmental Registry — GPL-3.0
+<small><strong>Copyright © 2026 Government of Brazil — Ministry of Management and Innovation in Public Services</strong></small>
 """
 
 # Zensical supports both implicit navigation and explicitly defined navigation.
