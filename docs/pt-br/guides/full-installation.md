@@ -28,7 +28,9 @@ flowchart LR
 
 ### Passo 1 — Organizar os repositórios
 
-O DSP é dividido em **repositórios irmãos** no GitHub. Recomendamos criar uma pasta `dsp` e clonar tudo **no mesmo nível** — o `dsp-core` espera os outros módulos em `../dsp-backend`, `../dsp-frontend`, etc.
+O DSP é dividido em **repositórios irmãos** no GitHub. Recomendamos criar uma pasta `dsp` e clonar tudo **no mesmo nível**.
+
+Os scripts procuram cada módulo nesta ordem: primeiro a pasta curta (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) e, se o código não estiver lá, a pasta com o nome do repositório (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`). Se as duas faltarem, o download automático cria a pasta com o nome do repositório. A publicação automática no CI continua usando a pasta curta.
 
 #### Opção A — fluxo mais simples (recomendado)
 

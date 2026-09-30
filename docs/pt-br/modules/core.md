@@ -36,7 +36,7 @@ flowchart TD
 - Object storage SeaweedFS (`dsp-object-storage`, profile `object-storage`) e job geo-file (`dsp-job-geo-file-generation`, mesmo profile) — obrigatórios no adotante real; a Demo Brasil não sobe esses serviços.
 - Job de migração (`dsp-job-migration`, profile `migration`).
 - Três scripts operacionais: `./config.sh`, `./setup.sh`, `./start.sh`.
-- Clone automático dos repositórios irmãos quando ausentes (com preview da estrutura de pastas antes da confirmação). `./config.sh` também clona o job se faltar.
+- Clone automático dos repositórios irmãos quando ausentes (com preview da estrutura de pastas antes da confirmação). O script olha a pasta curta (`backend` e equivalentes) e, se o código não estiver lá, a pasta com o nome do repositório (`dsp-*`). Se as duas faltarem, o download cria a pasta `dsp-*`. `./config.sh` também clona o job se faltar.
 
 ## Pré-requisitos
 
@@ -63,7 +63,7 @@ Wizard interativo que grava `config/adopter/adopter-config.yaml` e, na reaplica�
 
 Esses artefatos operacionais **não devem ser editados manualmente** — são derivados e **regenerados** a cada reaplicação de `./config.sh`. Ajuste sempre `config/adopter/adopter-config.yaml` (wizard ou editor) e depois reaplique.
 
-Rodar sem argumentos (`./config.sh`). Antes do wizard, o script confere os repositórios irmãos (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`) e oferece clonar o que faltar.
+Rodar sem argumentos (`./config.sh`). Antes do wizard, o script procura cada módulo na pasta curta (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) e, se o código não estiver lá, na pasta `dsp-*`. Se as duas faltarem, oferece clonar para a pasta com o nome do repositório.
 
 O wizard **não** pergunta horário de job batch nem grava `DSP_MIGRATION_CRON` ou `DSP_GEO_FILE_GENERATION_CRON`. Reaplicar (opção **1**) não altera crons no `.env`.
 
@@ -209,7 +209,7 @@ Use **depois** do `./setup.sh`. Não roda migração, seed, populate de GeoServe
 | Passo do script | O que faz |
 |-----------------|-----------|
 | 1 — Pré-requisitos | Docker; cria/valida `.env` |
-| 2 — Repositórios | Confere `dsp-backend` e `dsp-frontend` (`DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH`, padrão `../…`) |
+| 2 — Repositórios | Procura backend e frontend na pasta curta (`../backend`, `../frontend`) e depois em `../dsp-backend` e `../dsp-frontend`. Grava o caminho usado em `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH`. |
 | 3 — Config em disco | Exige `installation-config.json`, `mapLayersConfig.json` e `downloadThemesConfig.json` (válidos; tipicamente gerados pelo `./config.sh` ou quickstart na demo) |
 | 4 — Infraestrutura | **Só verifica** se os containers esperados já estão rodando (falha com hint se não). Demo: dois bancos + dois GeoServers. Adotante real: o mesmo núcleo +, conforme o `.env`, job de migração, `dsp-object-storage` e job geo-file |
 | 5 — URL do site | Mostra a URL pública do frontend (`dsp_public_base_url` + `VITE_BASE_URL`) |
@@ -329,7 +329,7 @@ O `./config.sh` grava JDBC, SRID e `DSP_OBJECT_STORAGE_*` (a partir de `environm
 | `DSP_OBJECT_STORAGE_ENDPOINT` | Quando definido, habilita o job geo-file (`profile=geo-file`) |
 | Build args do frontend | `VITE_BASE_URL`, `VITE_DSP_API_URL` — definem base path e URL da API usadas no build da imagem |
 | `DSP_OBJECT_STORAGE_*` / `DSP_OBJECT_STORAGE_HOST_PORT` | Endpoint interno do SeaweedFS (`http://dsp-object-storage:8333`), bucket, credenciais e porta no host para diagnóstico — derivados de `environment.object_storage` no reaplicar do `./config.sh` (não perguntados no wizard). Demo Brasil deixa o endpoint vazio |
-| `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH` / `DSP_JOB_MIGRATION_PATH` / `DSP_JOB_GEO_FILE_GENERATION_PATH` | Paths dos repositórios irmãos usados na orquestração de build |
+| `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH` / `DSP_JOB_MIGRATION_PATH` / `DSP_JOB_GEO_FILE_GENERATION_PATH` | Caminho do código de cada módulo no build. O script procura a pasta curta e depois a pasta `dsp-*`, e grava aqui a pasta usada. Se as duas faltarem, o download cria a pasta `dsp-*`. |
 
 Veja também: [Instalação completa](../guides/full-installation.md), [Bancos de dados](../architecture/databases.md).
 
