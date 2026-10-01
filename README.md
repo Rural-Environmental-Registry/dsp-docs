@@ -41,61 +41,61 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3. Subir a documentação localmente
+### 3. Subir a documentação localmente (pt-br + en)
 
-Português (Brasil):
+Use o script que faz o build completo e serve a pasta `site/` (igual ao GitHub Pages):
 
 ```bash
-zensical serve -f zensical.pt-br.toml
+chmod +x start-docs.sh scripts/build-site.sh
+./start-docs.sh
 ```
 
-English:
+Abra: [http://127.0.0.1:8000/pt-br/](http://127.0.0.1:8000/pt-br/) (troca de idioma no menu → `/en/`).
+
+Para **parar** o servidor:
 
 ```bash
-zensical serve -f zensical.en.toml
+./start-docs.sh --stop
 ```
 
-Abra no navegador: [http://localhost:8000](http://localhost:8000)
+**Importante:** não use `zensical build -f zensical.pt-br.toml` direto nos TOMLs fonte — o `site_url` usa o placeholder `__DOCS_PAGES_BASE__` e o HTML sai quebrado. O `build-site.sh` (e o CI) passam por `scripts/resolve-zensical-config.sh`.
 
-Opções úteis:
+### 4. Edição com live reload (um idioma)
+
+Sem troca de idioma no menu (só o locale escolhido):
 
 ```bash
-# Abrir o navegador automaticamente
-zensical serve -f zensical.pt-br.toml --open
-
-# Outra porta
-zensical serve -f zensical.pt-br.toml --dev-addr localhost:8080
+./scripts/serve-one-locale.sh pt-br
+# ou
+./scripts/serve-one-locale.sh en --open
 ```
 
-O `serve` reconstrói um idioma por vez e **não** inclui o outro locale na mesma URL — para alternar idioma no menu, prefira `./start-docs.sh` ou o build completo abaixo.
+Abra [http://127.0.0.1:8000](http://127.0.0.1:8000) — o conteúdo fica na raiz do servidor, **sem** prefixo `/pt-br/`.
 
-`zensical.toml` é equivalente a `zensical.pt-br.toml` (compatibilidade com `zensical serve` sem `-f`).
-
-### 4. Gerar o site estático (opcional)
-
-Build completo (raiz + os dois idiomas), como no CI:
+### 5. Gerar o site estático (opcional)
 
 ```bash
-rm -rf site && mkdir -p site
-cp static/root/index.html site/index.html
-zensical build -f zensical.pt-br.toml --clean
-zensical build -f zensical.en.toml
+./scripts/build-site.sh
 ```
 
 A saída fica em `site/` (`index.html`, `pt-br/`, `en/`). Essa pasta não vai para o Git; o CI gera de novo no deploy.
 
-Para testar o **seletor de idioma** localmente, use o build completo em `site/` (pastas `/pt-br/` e `/en/` na mesma origem). O script [`start-docs.sh`](start-docs.sh) faz isso e abre [http://127.0.0.1:8000/pt-br/](http://127.0.0.1:8000/pt-br/). No GitHub Pages, um script acrescenta o prefixo `/dsp-docs` aos links de idioma.
+`zensical.toml` é equivalente a `zensical.pt-br.toml` (compatibilidade com `zensical serve` sem `-f`, se resolver o config antes).
 
 ## Editar o conteúdo
 
 1. Ative o ambiente: `source .venv/bin/activate`
-2. Rode `zensical serve -f zensical.pt-br.toml` ou `zensical.en.toml`
+2. Rode `./start-docs.sh` (dois idiomas) ou `./scripts/serve-one-locale.sh pt-br` (live reload)
 3. Edite o Markdown em `docs/pt-br/` e/ou `docs/en/`
 4. Ajuste a navegação no `zensical.pt-br.toml` ou `zensical.en.toml` correspondente
 
 **Paridade de idiomas:** alterações de conteúdo em `docs/pt-br/` devem incluir a tradução equivalente em `docs/en/` na mesma mudança (mesmos caminhos de arquivo e estrutura de `nav`).
 
 Ao alterar extensões Markdown, `features` ou tema, atualize **os dois** arquivos `zensical.*.toml` para manter o comportamento alinhado.
+
+O seletor de idioma e a página raiz montam URLs no navegador a partir do **path atual** (`origin` + tudo antes de `/pt-br/` ou `/en/`), sem nome fixo de repositório — funciona em qualquer fork (`https://usuario.github.io/outro-nome/pt-br/`, etc.).
+
+No CI, `site_url` (canonical/SEO) é resolvido automaticamente com `GITHUB_REPOSITORY` (`https://<owner>.github.io/<repo>/...`). Domínio customizado: defina `DOCS_PAGES_BASE` no workflow. Localmente: `scripts/resolve-zensical-config.sh` usa `http://127.0.0.1:8000` por padrão.
 
 ## Publicação
 
@@ -111,3 +111,5 @@ Depois, push em `main` dispara o workflow [Documentation](.github/workflows/docs
 ## Licença
 
 GPL-3.0 — Rural Environmental Registry
+
+<small><strong>Copyright © 2026 Government of Brazil — Ministry of Management and Innovation in Public Services</strong></small>

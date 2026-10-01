@@ -4,26 +4,42 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RER DSP — Documentation</title>
-  <link rel="alternate" hreflang="pt-BR" href="https://rural-environmental-registry.github.io/rer-dsp-docs/pt-br/">
-  <link rel="alternate" hreflang="en" href="https://rural-environmental-registry.github.io/rer-dsp-docs/en/">
+  <link rel="alternate" hreflang="pt-BR" href="pt-br/">
+  <link rel="alternate" hreflang="en" href="en/">
   <style>
     body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; }
     h1 { font-size: 1.25rem; }
     ul { padding-left: 1.25rem; }
+    /* Hidden by default so the page reads as a blank flash instead of
+       showing the chooser text right before the JS redirect fires.
+       The no-JS fallback below (and the safety timeout) reveal it again. */
+    body.js-redirect { visibility: hidden; }
   </style>
 </head>
-<body>
+<body class="js-redirect">
   <h1>RER DSP — Documentação / Documentation</h1>
   <p>Escolha o idioma / Choose a language:</p>
   <ul>
     <li><a id="link-pt" href="#">🇧🇷 Português (Brasil)</a></li>
     <li><a id="link-en" href="#">🇺🇸 English</a></li>
   </ul>
+  <noscript>
+    <style>body.js-redirect { visibility: visible; }</style>
+  </noscript>
   <script>
     (function () {
+      // Safety net: if the redirect below doesn't fire for any reason
+      // (blocked script, unexpected error), reveal the manual links
+      // instead of leaving the page permanently blank.
+      var revealTimer = setTimeout(function () {
+        document.body.classList.remove("js-redirect");
+      }, 5000);
       function docsBasePath() {
-        var match = location.pathname.match(/^(\/rer-dsp-docs)(?=\/|$)/);
-        return match ? match[1] : "";
+        var match = location.pathname.match(/^(.*)\/(pt-br|en)(?:\/|$)/);
+        if (match) {
+          return match[1];
+        }
+        return location.pathname.replace(/\/index\.html$/i, "").replace(/\/$/, "");
       }
 
       var base = docsBasePath();

@@ -137,6 +137,8 @@ As mesmas tabelas lógicas existem nos **dois** Postgres (`territory_level_1`, `
 
 O job deriva `boundary_box` e `centroid_coordinates` na origem e grava só no `dsp-db`. A geometria integral vai para `geom` no geoserver-db.
 
+A coluna `area` em `dsp.area_of_interest` e a tabela `dsp.kpi_measure` existem **somente** no `dsp-db` (não no geo-target). A área **não** faz parte do dual-write: o `kpiCalculationJob` a calcula a partir da `geom` no geo-target. Temas de KPI também não são colunas da AOI.
+
 `created_at` no destino é obrigatório (base do watermark). `updated_at` é preenchido quando o YAML declara `updated-at-column`.
 
 Por que não guardar o polígono inteiro no `dsp-db`? Ver o aviso em [Arquitetura — Fluxo de dados](overview.md#fluxo-de-dados).
@@ -177,7 +179,7 @@ Se a migração **falha**, as flags **não** mudam. Mais contexto: [dsp-job-geo-
 
 | Componente | Fonte JDBC | `dsp-db` | `dsp-geoserver-db` | Outros |
 |------------|------------|----------|---------------------|--------|
-| Job migração | leitura | escrita `dsp` + `data_migration` | escrita `geom` | — |
+| Job migração | leitura | escrita `dsp` + `data_migration`; `area` e `kpi_measure` via kpi-job | escrita `geom` | — |
 | Job geo-file | — | **lê** flags · **grava** `geo_file_generation` e atualiza flags | **lê** `geom` | **grava** CSV no SeaweedFS |
 | Backend | — | **lê** / **grava** negócio (`dsp`) | — | **lê** S3 · **lê** WFS no Download (via API) |
 | GeoServer Exhibition | — | — | **lê** camadas (WMS/WFS) | — |
@@ -195,6 +197,8 @@ Cada execução com delta faz **uma leitura na origem** e **duas escritas em ban
 1. Lê atributos + geometria na fonte JDBC (watermark + `where-clause`).
 2. UPSERT no **`dsp-db`**: atributos + `boundary_box` + `centroid_coordinates` — **sem** coluna `geom`.
 3. UPSERT no **`dsp-geoserver-db`** (outro Postgres): mesmos atributos + **`geom` completa**.
+
+O `kpiCalculationJob` não participa desse dual-write: depois dos jobs de AOI e camadas, lê o geo-target e atualiza `area` e `kpi_measure` só no `dsp-db`.
 
 ```mermaid
 flowchart LR

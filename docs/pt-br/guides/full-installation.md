@@ -28,7 +28,9 @@ flowchart LR
 
 ### Passo 1 — Organizar os repositórios
 
-O DSP é dividido em **repositórios irmãos** no GitHub. Recomendamos criar uma pasta `dsp` e clonar tudo **no mesmo nível** — o `dsp-core` espera os outros módulos em `../dsp-backend`, `../dsp-frontend`, etc.
+O DSP é dividido em **repositórios irmãos** no GitHub. Recomendamos criar uma pasta `dsp` e clonar tudo **no mesmo nível**.
+
+Os scripts procuram cada módulo nesta ordem: primeiro a pasta curta (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) e, se o código não estiver lá, a pasta com o nome do repositório (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`). Se as duas faltarem, o download automático cria a pasta com o nome do repositório. A publicação automática no CI continua usando a pasta curta.
 
 #### Opção A — fluxo mais simples (recomendado)
 
@@ -97,7 +99,7 @@ O fluxo tem **6 etapas** guiadas (a última, About, é opcional):
 | **2** | Tabelas, colunas, SRID e camadas genéricas |
 | **3** | Textos de aplicação, formatos de data |
 | **4** | Interface: hierarquia, telas, mapa, estilos das camadas fixas |
-| **5** | KPIs (cores, unidade de área, temas 0–4) |
+| **5** | KPIs (cores, unidade de área, temas 0–4). A área numérica **não** vem da origem: o `kpiCalculationJob` calcula `dsp.area_of_interest.area` e os temas em `dsp.kpi_measure` depois da migração |
 | **6** | About opcional (abas em Markdown) |
 
 O `./config.sh` grava a **fonte de verdade do adotante** em `config/adopter/adopter-config.yaml` — **este** é o arquivo pensado para edição manual ou importação de YAML pronto. Na reaplicação (wizard ou opção **1 — Reaplicar**), o `./config.sh` **gera os arquivos operacionais** consumidos pelo backend, GeoServers e jobs. **Não edite esses operacionais à mão:** eles são sobrescritos a cada `./config.sh`.

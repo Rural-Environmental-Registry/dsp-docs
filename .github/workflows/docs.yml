@@ -22,10 +22,8 @@ jobs:
           python-version: 3.x
       - run: pip install zensical
       - run: |
-          rm -rf site && mkdir -p site
-          cp static/root/index.html site/index.html
-          zensical build -f zensical.pt-br.toml --clean
-          zensical build -f zensical.en.toml
+          chmod +x scripts/build-site.sh
+          ./scripts/build-site.sh
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site

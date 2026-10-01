@@ -10,7 +10,7 @@
 
 docs_dir = "docs/en"
 site_dir = "site/en"
-site_url = "https://rural-environmental-registry.github.io/dsp-docs/en/"
+site_url = "__DOCS_PAGES_BASE__/en/"
 
 # The site_name is shown in the page header and the browser window title
 #
@@ -35,7 +35,7 @@ site_author = "Rural Environmental Registry"
 #
 # Read more: https://zensical.org/docs/setup/basics/#copyright
 copyright = """
-Rural Environmental Registry — GPL-3.0
+<small><strong>Copyright © 2026 Government of Brazil — Ministry of Management and Innovation in Public Services</strong></small>
 """
 
 # Zensical supports both implicit navigation and explicitly defined navigation.
@@ -91,10 +91,7 @@ extra_css = ["stylesheets/media-zoom.css"]
 # The path provided should be relative to the "docs_dir".
 #
 # Read more: https://zensical.org/docs/customization/#additional-javascript
-extra_javascript = [
-  "javascripts/locale-alternate-links.js",
-  "javascripts/media-zoom.js",
-]
+extra_javascript = ["javascripts/media-zoom.js"]
 
 # ----------------------------------------------------------------------------
 # Section for configuring theme options
@@ -112,7 +109,7 @@ extra_javascript = [
 # Read more:
 # - https://zensical.org/docs/customization/#extending-the-theme
 #
-#custom_dir = "overrides"
+custom_dir = "overrides"
 
 # With the "favicon" option you can set your own image to use as the icon
 # browsers will use in the browser title bar or tab bar. The path provided
@@ -319,10 +316,12 @@ features = [
 [[project.theme.palette]]
 scheme = "default"
 toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
 
 [[project.theme.palette]]
 scheme = "slate"
 toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
 
 # ----------------------------------------------------------------------------
 # The "extra" section contains miscellaneous settings.

@@ -70,9 +70,10 @@ Layers depend on `area_of_interest_id` pointing to records that already exist in
 1. Admin units (level-1 → level-2 → level-3)
 2. Area of interest (area-of-interest)
 3. Generic layers (layer-jobs)   ← this module
+4. KPI calculation (kpi-job)     ← after the layers used by themes
 ```
 
-In practice, fixed jobs’ `JobRunner` runs **before** the layer runner (`@Order(1)` and `@Order(2)`).
+In practice, fixed jobs’ `JobRunner` runs **before** the layer runner (`@Order(1)` and `@Order(2)`); `kpiCalculationJob` runs after (`@Order(3)`). Each theme KPI in the wizard points at the `layer-name` of a layer migrated here.
 
 ---
 

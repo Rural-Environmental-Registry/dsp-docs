@@ -9,7 +9,7 @@ The DSP is made up of **6 application/job repositories** under [Rural-Environmen
 | [dsp-core](https://github.com/Rural-Environmental-Registry/dsp-core) | Orchestration and configuration: `./config.sh`, `./setup.sh`, `./start.sh`; starts databases, **gateway**, two **GeoServers** (Exhibition + Download), **object storage** (profile `object-storage`), and orchestrates builds of the other modules | Docker Compose, Python 3 (wizard) | [More details](modules/core.md) |
 | [dsp-backend](https://github.com/Rural-Environmental-Registry/dsp-backend) | REST API—business data, territories, downloads (WFS or CSV pre-generated in S3) | Java 21 + Spring Boot 3.4.2 + PostGIS | [More details](modules/backend.md) |
 | [dsp-frontend](https://github.com/Rural-Environmental-Registry/dsp-frontend) | Web UI—search, KPIs, interactive map | Vue 3 + Vite + TypeScript | [More details](modules/frontend.md) |
-| [dsp-job-data-migration](https://github.com/Rural-Environmental-Registry/dsp-job-data-migration) | Geospatial ETL—synchronizes the adopter JDBC source with `dsp-db` and `geoserver-db` (dual-write) | Java 21 + Spring Batch | [More details](modules/job-data-migration/overview.md) |
+| [dsp-job-data-migration](https://github.com/Rural-Environmental-Registry/dsp-job-data-migration) | Geospatial ETL—synchronizes the adopter JDBC source with `dsp-db` and `geoserver-db` (dual-write); post-migration KPI job (AOI `area` + `kpi_measure`) | Java 21 + Spring Batch | [More details](modules/job-data-migration/overview.md) |
 | [dsp-job-geo-file-generation](https://github.com/Rural-Environmental-Registry/dsp-job-geo-file-generation) | Pre-generates territorial download files and publishes to object storage; keeps consultation fast at high volume (e.g. [SICAR](https://www.car.gov.br/) scale) | Java 21 + Spring Boot / Batch | [More details](modules/job-geo-file-generation/overview.md) |
 | [dsp-docs](https://github.com/Rural-Environmental-Registry/dsp-docs) (this repository) | Central ecosystem documentation | Zensical | — |
 
@@ -48,7 +48,7 @@ flowchart LR
   gw -->|/geoserver-exhibition/| gsEx
 
   jobMig -->|read| srcDb
-  jobMig -->|"business + bbox/centroid"| dspDb
+  jobMig -->|"business + bbox/centroid + KPIs"| dspDb
   jobMig -->|"full geom"| gsDb
   core -.config/schema/build.-> jobMig
   core -.-> jobGeo

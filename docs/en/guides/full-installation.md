@@ -28,7 +28,9 @@ flowchart LR
 
 ### Step 1 — Organize repositories
 
-The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level** — `dsp-core` expects other modules at `../dsp-backend`, `../dsp-frontend`, etc.
+The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level**.
+
+The scripts look for each module in this order: first the short folder (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) and, if the code is not there, the folder named after the repository (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`). When both are missing, the automatic download creates the repository-named folder. Automatic publishing in CI keeps using the short folder.
 
 #### Option A — simplest flow (recommended)
 
@@ -97,7 +99,7 @@ The flow has **6 guided steps** (the last, About, is optional):
 | **2** | Tables, columns, SRID, and generic layers |
 | **3** | Application text, date formats |
 | **4** | UI: hierarchy, screens, map, fixed layer styles |
-| **5** | KPIs (colors, area unit, themes 0–4) |
+| **5** | KPIs (colors, area unit, themes 0–4). The numeric area does **not** come from the source: `kpiCalculationJob` computes `dsp.area_of_interest.area` and theme rows in `dsp.kpi_measure` after migration |
 | **6** | Optional About (Markdown tabs) |
 
 `./config.sh` writes the **adopter source of truth** to `config/adopter/adopter-config.yaml` — **this** is the file meant for manual editing or importing ready YAML. On reapply (wizard or option **1 — Reapply**), `./config.sh` **generates operational files** consumed by backend, GeoServers, and jobs. **Do not edit those operational files by hand:** they are overwritten on every `./config.sh`.

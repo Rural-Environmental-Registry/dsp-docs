@@ -36,7 +36,7 @@ flowchart TD
 - SeaweedFS object storage (`dsp-object-storage`, profile `object-storage`) and geo-file job (`dsp-job-geo-file-generation`, same profile) — required for a real adopter; Brazil Demo does not start these services.
 - Migration job (`dsp-job-migration`, profile `migration`).
 - Three operational scripts: `./config.sh`, `./setup.sh`, `./start.sh`.
-- Automatic clone of sibling repositories when missing (with folder structure preview before confirmation). `./config.sh` also clones the job if missing.
+- Automatic clone of sibling repositories when missing (with a folder-structure preview before confirmation). The script looks in the short folder (`backend` and the equivalents) and, if the code is not there, in the repository-named folder (`dsp-*`). When both are missing, the download creates the `dsp-*` folder. `./config.sh` also clones the job if it is missing.
 
 ## Prerequisites
 
@@ -63,7 +63,7 @@ Interactive wizard that writes `config/adopter/adopter-config.yaml` and, on reap
 
 These operational artifacts **must not be edited manually** — they are derived and **regenerated** on every reapply of `./config.sh`. Always adjust `config/adopter/adopter-config.yaml` (wizard or editor) and then reapply.
 
-Run with no arguments (`./config.sh`). Before the wizard, the script checks sibling repositories (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`) and offers to clone what is missing.
+Run with no arguments (`./config.sh`). Before the wizard, the script looks for each module in the short folder (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) and, if the code is not there, in the `dsp-*` folder. When both are missing, it offers to clone into the repository-named folder.
 
 The wizard does **not** ask for batch job schedule nor write `DSP_MIGRATION_CRON` or `DSP_GEO_FILE_GENERATION_CRON`. Reapply (option **1**) does not change crons in `.env`.
 
@@ -96,7 +96,7 @@ The wizard is split into **6 stages**. In each, the operator answers guided ques
 | **2 — Tables, columns, and layers** | For L1/L2/L3/AOI: table, PK (**one** column; composite not supported), `parent_key` (L2/L3), name, geometry, SRID, `created_at_column` (required), `updated_at_column` (optional), `where_clause`. On AOI: `territory_level_3_column`, `additional_columns`. Generic layers in `etl.layers[]` (ETL + map + downloads in one block) | ETL plan, `mapLayersConfig.json`, and `downloadThemesConfig.json`. Extra layers: [Generic layer migration](job-data-migration/generic-layers.md) |
 | **3 — Application** | Area-of-interest KPI label (`area_of_interest`), date and date-time formats | Dashboard, listings, and detail |
 | **4 — Interface** | Hierarchy labels, screen titles, AOI detail panel fields, `map.initialView` (`territorial_bbox` / `manual` / `planet`), groups and styles for fixed map layers | Frontend, layer selector, and styles published on GeoServer |
-| **5 — KPIs** | Card colors, AOI area unit, count and mapping of theme KPIs (0–4) | KPI cards and job calculations |
+| **5 — KPIs** | Card colors, AOI area unit, count and mapping of theme KPIs (0–4) | `kpis` block in `application.yaml`, `THEME_*` cards, and `kpi-job` |
 | **6 — About** (optional) | Enable About page, banner title, tabs (label + `.md` / `.markdown` file; wizard can copy from any folder to `config/about/`) | `about-config.json` + content in `config/about/` |
 
 In the terminal the wizard shows **5 numbered stages** (1–5) plus the optional **About** block at the end — in documentation, About counts as **stage 6**.
@@ -104,6 +104,12 @@ In the terminal the wizard shows **5 numbered stages** (1–5) plus the optional
 **Object storage (SeaweedFS)** is not asked in the wizard. Credentials and endpoint live in `environment.object_storage` in `adopter-config.yaml` (see `adopter-config.yaml.example`); `./config.sh` copies this to `DSP_OBJECT_STORAGE_*` in `.env` on reapply. The geo-file job **schedule** (`DSP_GEO_FILE_GENERATION_CRON`) comes from `./setup.sh`, not this stage.
 
 `./config.sh` (option **2 — edit**) reopens the same 6-stage wizard with current values filled in.
+
+#### Jobs generated automatically
+
+The wizard does **not** ask which fixed jobs to enable. Generated `application.yaml` always turns on L1, L2, L3, area of interest, and `kpi-job`. The `layer-jobs` flag becomes `true` when `etl.layers[]` has entries; otherwise `false`.
+
+The area shown on KPIs does **not** come from the source: `kpiCalculationJob` computes `dsp.area_of_interest.area` and writes themes to `dsp.kpi_measure` after migration. Stage **5** sets `theme_count` (0–4), each theme `layer`, the area unit, and card colors. Detail: [KPI calculation](job-data-migration/overview.md#kpi-calculation).
 
 #### Advanced SQL in `source_table` (fixed levels)
 
@@ -203,7 +209,7 @@ Use **after** `./setup.sh`. It does not run migration, seed, GeoServer populate,
 | Script step | What it does |
 |-------------|--------------|
 | 1 — Prerequisites | Docker; create/validate `.env` |
-| 2 — Repositories | Checks `dsp-backend` and `dsp-frontend` (`DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH`, default `../…`) |
+| 2 — Repositories | Looks for backend and frontend in the short folder (`../backend`, `../frontend`) and then in `../dsp-backend` and `../dsp-frontend`. Writes the path it used to `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH`. |
 | 3 — Config on disk | Requires `installation-config.json`, `mapLayersConfig.json`, and `downloadThemesConfig.json` (valid; typically from `./config.sh` or demo quickstart) |
 | 4 — Infrastructure | **Only verifies** expected containers are running (fails with hint if not). Demo: two databases + two GeoServers. Real adopter: same core +, per `.env`, migration job, `dsp-object-storage`, and geo-file job |
 | 5 — Site URL | Shows public frontend URL (`dsp_public_base_url` + `VITE_BASE_URL`) |
@@ -324,7 +330,7 @@ checking behavior. To clear cache, remove volume `dsp_gateway_cache`.
 | `DSP_OBJECT_STORAGE_ENDPOINT` | When set, enables geo-file job (`profile=geo-file`) |
 | Frontend build args | `VITE_BASE_URL`, `VITE_DSP_API_URL` — base path and API URL used in image build |
 | `DSP_OBJECT_STORAGE_*` / `DSP_OBJECT_STORAGE_HOST_PORT` | SeaweedFS internal endpoint (`http://dsp-object-storage:8333`), bucket, credentials, and host port for diagnostics — derived from `environment.object_storage` on `./config.sh` reapply (not asked in wizard). Brazil Demo leaves endpoint empty |
-| `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH` / `DSP_JOB_MIGRATION_PATH` / `DSP_JOB_GEO_FILE_GENERATION_PATH` | Sibling repository paths used in build orchestration |
+| `DSP_BACKEND_PATH` / `DSP_FRONTEND_PATH` / `DSP_JOB_MIGRATION_PATH` / `DSP_JOB_GEO_FILE_GENERATION_PATH` | Path to each module's code for the build. The script looks in the short folder and then in the `dsp-*` folder, and writes the folder it used here. When both are missing, the download creates the `dsp-*` folder. |
 
 See also: [Full installation](../guides/full-installation.md), [Databases](../architecture/databases.md).
 
@@ -360,7 +366,7 @@ flowchart LR
 - **`select-runtime-config.sh`** — on Docker build, picks active file or `.example` and copies to `/config` inside the image.
 - **`installation-config.json`** — labels, hierarchy, screens, KPIs, and `screens.home.detail.fields` (`DSP_INSTALLATION_CONFIG_FILE`). That array does **not** go to the job `application.yaml`.
 - **`mapLayersConfig.json`** — WMS groups and layers; published on GeoServers by `populate_geoserver.sh`.
-- **`downloadThemesConfig.json`** — download themes (AOI + `etl.layers[]`); `wfsBaseUrl` at `${DSP_PUBLIC_BASE_URL}/geoserver-download/dsp/wfs`.
+- **`downloadThemesConfig.json`** — download themes (AOI + `etl.layers[]`); `formats` is `csv` and `gpkg`; `wfsBaseUrl` at `${DSP_PUBLIC_BASE_URL}/geoserver-download/dsp/wfs`.
 - **`about-config.json`** — About index (`enabled`, `bannerTitle`, `tabs` with ids `tab-1`, `tab-2`, …).
 - **`application.yaml`** — ETL plan. Copied to job image at build (with entrypoint and GeoServer publish scripts).
 - **`config/Job-Geo-File-Generation/application/application.yaml`** — S3 for pre-generation job (no cron; schedule only in `.env` via `./setup.sh`).

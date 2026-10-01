@@ -6,8 +6,8 @@ Checklist and queries to confirm that migration via `dsp-job-data-migration` com
 
 | Moment | Goal |
 |--------|------|
-| After each job (L1, L2, L3, area of interest, layers) | Isolate problems by level |
-| After the full sequence | Confirm base ready for the DSP |
+| After each job (L1, L2, L3, area of interest, layers, kpi-job) | Isolate problems by level |
+| After the full sequence (including `kpiCalculationJob`) | Confirm base ready for the DSP and Home KPIs |
 | Before enabling GeoServer/API | Avoid publishing incomplete data |
 
 ## Quick checklist
@@ -20,6 +20,9 @@ Checklist and queries to confirm that migration via `dsp-job-data-migration` com
 - [ ] Geometry sample with `ST_IsValid` and SRID per YAML `srid` — in both destinations (`dsp-db`: bbox/centroid; `geoserver-db`: `geom`)
 - [ ] Hierarchy FKs resolved (if applicable)
 - [ ] GeoServer layer points to the correct table/view
+- [ ] `kpiCalculationJob` with `status = COMPLETED` (when `kpi-job` is enabled)
+- [ ] `dsp.area_of_interest.area` filled where geo-target has geometry
+- [ ] `dsp.kpi_measure` consistent with `theme-count` and configured layers
 
 ## 1. Spring Batch status
 
@@ -184,7 +187,48 @@ Repeat the pattern for level-3 → level-2. AOI: `territory_level_3_id` must exi
 | Slow job with `thread-pool-size: 1` | Expected on large tables |
 | Immediate `SKIP` | No temporal delta — confirm source actually changed after watermark |
 
-## 7. GeoServer
+## 7. KPI job (`kpiCalculationJob`)
+
+Confirm the latest run of the `kpiCalculationJob` bean (do not confuse it with the kebab-case flag `kpi-job`):
+
+```sql
+SELECT i.job_name, e.status, e.exit_code, e.start_time, e.end_time
+FROM data_migration.batch_job_execution e
+JOIN data_migration.batch_job_instance i ON e.job_instance_id = i.job_instance_id
+WHERE i.job_name = 'kpiCalculationJob'
+ORDER BY e.job_execution_id DESC
+LIMIT 5;
+```
+
+### AOI area (dsp-db)
+
+```sql
+SELECT COUNT(*) AS total,
+       COUNT(area) AS com_area,
+       COUNT(*) FILTER (WHERE area IS NOT NULL AND area > 0) AS area_positiva
+FROM dsp.area_of_interest;
+```
+
+Compare with valid geometries on geo-target:
+
+```sql
+SELECT COUNT(*) AS com_geom
+FROM dsp.area_of_interest
+WHERE geom IS NOT NULL AND ST_IsValid(geom);
+```
+
+### Theme measures (`kpi_measure`)
+
+```sql
+SELECT kpi_name, COUNT(*) AS registros, SUM(value) AS soma
+FROM dsp.kpi_measure
+GROUP BY kpi_name
+ORDER BY kpi_name;
+```
+
+With `theme-count: 0`, expect zero rows after truncate. With themes enabled, each `kpi_name` must match the YAML `layer-name` and `card.layer` in `installation-config.json`.
+
+## 8. GeoServer
 
 | Check | How |
 |-------|-----|
@@ -203,5 +247,7 @@ Repeat the pattern for level-3 → level-2. AOI: `territory_level_3_id` must exi
 | Broken FK between levels | Wrong order or incomplete L1 | Re-run L1 → L2 → L3 |
 | App starts and exits “ok” with no data | No flag `true` | Enable at least one job |
 | Incremental “lagging” | Null or missing `updated-at-column` | Fill column or reset `sync-key` |
+| Empty or missing theme cards on Home | `kpi-job` did not run, `theme-count` does not match configured layers, or backend still has a cached config | Confirm `kpiCalculationJob` `COMPLETED`; align `kpis.themes[].layer-name` with migrated layers; restart `dsp-backend` after `./config.sh` |
+| AOI area zero or null | Missing/invalid geometry on geo-target, or KPI job did not run | Check `geom` on `dsp.area_of_interest` in geoserver-db; run `kpi-job` |
 
 Job overview: [Overview](overview.md).

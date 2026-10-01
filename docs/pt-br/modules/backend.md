@@ -169,12 +169,30 @@ Exemplo com modo planet:
 | `screens.home` / `screens.downloads` | Quais níveis cada tela usa e textos dos campos. Em `screens.home.detail.fields`, a lista exclusiva da ficha da AOI (`field` + `label`) |
 | `kpis` | Cards da home (rótulos, unidades, cores) |
 | `map.initialView` | Modo de abertura/reset do mapa na Home. `mode` obrigatório: `territorial_bbox` (enquadra via `GET /territory/boundary-box`; se nenhum nível territorial L1/L2/L3 estiver configurado no ETL, o `./config.sh` grava `planet` explicitamente), `manual` (exige `latitude`, `longitude`, `zoom`) ou `planet` (sempre centro `[0,0]` zoom `0`) |
-| `areaOfInterest` | Unidade/rótulo da área do imóvel — a área em si vem migrada da origem, o DSP não a calcula nem converte unidade |
+| `areaOfInterest` | Unidade/rótulo da área do imóvel (`areaUnit`, `optionalLabel`) — o valor numérico vem de `dsp.area_of_interest.area`, **calculado** pelo `kpiCalculationJob` a partir da geometria no geo-target |
 | `formats` | Padrões de exibição de data/hora na UI |
 
 Entre frontend e backend, datas trafegam sempre em `yyyy-MM-dd` (só dia) ou `yyyy-MM-dd'T'HH:mm:ss` (dia + hora); a UI converte para `formats.date`/`formats.dateTime` na exibição.
 
 O que **não** entra neste arquivo: unidades territoriais (tabelas `dsp.territory_level_*` + job de migração), camadas WMS/GeoServer (`GET /map/getBaseMaps` e `GET /map/getLayers`), catálogo de downloads (`downloadThemesConfig.json`) e o mapeamento origem→destino do ETL (`application.yaml` do job de migração).
+
+## TotalizerService (`POST /totalizer/`)
+
+A configuração (`GET /config/installation`) define **quais** cards aparecem na Home (`kpis.cards[]`: códigos `AREA_OF_INTEREST`, `THEME_1`…`THEME_4`, rótulos, unidades, cores e `layer` nos temas). Os **valores** vêm de `POST /totalizer/` com filtro territorial opcional (`level2Ids`, `level3Ids`).
+
+| Card (`code`) | Agregação | Fonte no `dsp-db` |
+|---------------|-----------|-------------------|
+| `AREA_OF_INTEREST` | Contagem de imóveis + soma de `area` | `dsp.area_of_interest` (filtro por L2/L3 via `territory_level_3_id`) |
+| `THEME_1`…`THEME_4` | Soma de `value` onde `kpi_name` = `card.layer` | `dsp.kpi_measure` (mesmo filtro territorial) |
+
+O campo `layer` de cada card de tema deve bater com `kpis.themes[].layer-name` no `application.yaml` do job e com o nome da tabela no geo-target (`dsp.<layer_name>`).
+
+Com `theme_count: 0` no adotante, só o card `AREA_OF_INTEREST` é gerado; `kpi_measure` fica vazio após o KPI job.
+
+Detalhe do cálculo: [Cálculo de KPIs](job-data-migration/overview.md#calculo-de-kpis).
+
+!!! note "Cache da configuração"
+    `InstallationConfigService` mantém o JSON em memória. Após `./config.sh`, reinicie o container `dsp-backend` (ou `./gradlew bootRun` local) para que novos cards ou `theme_count` apareçam na API. O frontend também cacheia `GET /config/installation` na sessão — use hard refresh se os cards mudaram.
 
 ## Downloads (GeoServer Download WFS)
 
@@ -182,10 +200,12 @@ O catálogo de temas de download vem de `downloadThemesConfig.json`, gerado pelo
 
 1. Valida território (nível 2 obrigatório, nível 3 opcional) no `dsp-db`.
 2. Monta filtro CQL por tema.
-3. Consulta o **GeoServer Download** via WFS (`GetFeature` com `resultType=hits` na busca; `outputFormat=csv` no download) em `DSP_GEOSERVER_WFS_BASE_URL`.
+3. Consulta o **GeoServer Download** via WFS (`GetFeature` com `resultType=hits` na busca; `outputFormat=csv` ou `outputFormat=gpkg` no download) em `DSP_GEOSERVER_WFS_BASE_URL`.
 4. Para temas com feições no recorte, consulta `updated_at` via WFS (`sortBy`, `count=1`) e preenche `lastUpdate` na resposta (data de negócio).
 5. Lê a metadata `generated-at` do objeto no storage (`HeadObject` do primeiro formato do tema) e preenche `lastFileGenerated`. O job grava esse instante no mesmo ISO UTC do CSV (`yyyy-MM-dd'T'HH:mm:ss'Z'`, exemplo `2026-09-10T16:55:19Z`), sem fração de segundo — não usa `Instant.toString()`. Sem objeto ou storage desligado, o campo fica `null`.
-6. Devolve status ou bytes CSV ao frontend — o browser não acessa o GeoServer para arquivos de download.
+6. Devolve status ou os bytes do arquivo ao frontend — o browser não acessa o GeoServer para arquivos de download.
+
+O CSV vem do bucket ou, na falta do objeto, do WFS `outputFormat=csv`. O GPKG segue o mesmo caminho (`outputFormat=gpkg`) no download. Na busca, CSV e GPKG aparecem com status disponível quando há feições no recorte; o GPKG também fica disponível se existir objeto no bucket mesmo com recorte vazio (arquivo pré-gerado). O download continua priorizando o bucket e usa o WFS como fallback para os dois formatos. O ZIP da área de interesse leva só o formato pedido (`format=csv` ou `format=gpkg`) dos temas que declaram esse formato e têm feições no recorte. O GPKG do fallback sai em `EPSG:4326`; o arquivo gerado pelo job mantém o SRID da camada.
 
 Se `updated_at` faltar no WFS, a busca continua OK e `lastUpdate` fica `null` (UI exibe `—`). Sem `generated-at`, `lastFileGenerated` também fica `null` (UI exibe `—`). Arquivos já no bucket só passam a ter `generated-at` na próxima geração bem-sucedida.
 

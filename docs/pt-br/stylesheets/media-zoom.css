@@ -133,12 +133,23 @@
   will-change: transform;
 }
 
+.media-zoom-overlay--mermaid .media-zoom-pan {
+  will-change: auto;
+}
+
 .media-zoom-pan > .mermaid,
 .media-zoom-pan > .zoom-media-host {
   display: block;
   width: max-content;
   max-width: none;
   margin: 0 auto;
+}
+
+/* Mermaid: SVG dimensions via JS; Chromium uses zoom (up to ~9.5×) + size for sharp scaling */
+.media-zoom-pan > .mermaid svg {
+  display: block;
+  max-width: none;
+  max-height: none;
 }
 
 .media-zoom-pan > .zoom-media-host img {

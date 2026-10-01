@@ -62,16 +62,27 @@ The map component consumes `/map/getBaseMaps` and `/map/getLayers` and integrate
 
 On the Home detail panel, `screens.home.detail.fields` (via `GET /config/installation`) defines fields and order. Values come from `attributes` in the detail response. Empty or missing list: the current 8 fields from the structural DTO. Download and “nearby others” stay outside that list.
 
+## KPIs on Home
+
+Definition and values are separate:
+
+1. `GET /config/installation` → which cards to show (`kpis.cards[]`), labels, units, and colors.
+2. `POST /totalizer/` → aggregated totals for the current territorial filter (L2/L3).
+
+Until the KPI job finishes, cards can show zeros (AOI area and themes depend on `dsp.area_of_interest.area` and `dsp.kpi_measure`).
+
 ## Backend integration
 
 Endpoints consumed by the frontend:
 
 | Endpoint | Use |
 |----------|-----|
-| `GET /config/installation` | Labels, hierarchy, screens, KPIs, and `screens.home.detail.fields` |
+| `GET /config/installation` | Labels, hierarchy, screens, KPIs (cards, labels, units), and `screens.home.detail.fields` |
+| `POST /totalizer/` | Home KPI card values (AOI count/sum + per-theme sums), filtered by the selected hierarchy |
 | `GET /downloads/themes` | Download themes |
 | `POST /downloads/search` | Search items by hierarchy/theme |
-| `GET /downloads/file` | CSV file download via backend |
+| `GET /downloads/file` | CSV or GPKG file download via backend |
+| `GET /downloads/features-bundle` | Area-of-interest ZIP (`aoiId` and `format` `csv` or `gpkg`) |
 | `GET /map/getBaseMaps` | Base maps |
 | `GET /map/getLayers` | Map layers |
 | `GET /geoServices/getRegions` | Regions |

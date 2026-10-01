@@ -9,6 +9,7 @@
   const MIN_COMFORT_SCALE = 1.85;
   const INITIAL_ZOOM_PADDING = 0.9;
   const FULLSCREEN_HINT_MS = 3000;
+  const CHROMIUM_MERMAID_CSS_ZOOM_CAP = 9.5;
 
   let overlay = null;
   let stage = null;
@@ -26,6 +27,8 @@
   const observedHints = new WeakSet();
   let activeHost = null;
   let hostAnchor = null;
+  let mermaidLayoutWidth = 0;
+  let mermaidLayoutHeight = 0;
 
   const ICON = {
     zoomIn:
@@ -80,16 +83,122 @@
     });
   }
 
+  function isMermaidHost(host) {
+    return host && host.getAttribute("data-zoom-host") === "mermaid";
+  }
+
+  function isChromiumBrowser() {
+    if (typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent || "";
+    return /Chrome|Chromium|Edg\//.test(ua) && !/Firefox/i.test(ua);
+  }
+
+  function clearMermaidZoomStyles(host) {
+    if (!host) return;
+    host.style.zoom = "";
+    const svg = host.querySelector("svg");
+    if (!svg) return;
+    svg.style.width = "";
+    svg.style.height = "";
+    svg.style.maxWidth = "";
+    svg.style.maxHeight = "";
+  }
+
+  function readMermaidBaseSize(host) {
+    const svg = host && host.querySelector("svg");
+    if (!svg) return null;
+
+    const rect = svg.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      return { w: rect.width, h: rect.height };
+    }
+
+    const viewBox = svg.viewBox && svg.viewBox.baseVal;
+    let w = parseFloat(svg.getAttribute("width"));
+    let h = parseFloat(svg.getAttribute("height"));
+    if (!(w > 0 && h > 0) && viewBox && viewBox.width > 0 && viewBox.height > 0) {
+      w = viewBox.width;
+      h = viewBox.height;
+    }
+    if (!(w > 0 && h > 0)) {
+      try {
+        const box = svg.getBBox();
+        if (box.width > 0 && box.height > 0) {
+          w = box.width;
+          h = box.height;
+        }
+      } catch (_err) {
+        /* SVG not rendered yet */
+      }
+    }
+    if (w > 0 && h > 0) return { w: w, h: h };
+    if (w > 0) return { w: w, h: w };
+    return null;
+  }
+
+  function storeMermaidBaseSize(host) {
+    const base = readMermaidBaseSize(host);
+    if (!base) return false;
+    mermaidLayoutWidth = base.w;
+    mermaidLayoutHeight = base.h;
+    return true;
+  }
+
+  function ensureMermaidBaseSize() {
+    if (!isMermaidHost(activeHost)) return false;
+    if (mermaidLayoutWidth > 0 && mermaidLayoutHeight > 0) return true;
+    clearMermaidZoomStyles(activeHost);
+    return storeMermaidBaseSize(activeHost);
+  }
+
+  function mermaidUsesDedicatedZoom() {
+    return isMermaidHost(activeHost) && mermaidLayoutWidth > 0 && mermaidLayoutHeight > 0;
+  }
+
+  function applyMermaidVisualScale() {
+    const svg = activeHost.querySelector("svg");
+    if (!svg) return;
+
+    activeHost.style.zoom = "";
+    svg.style.maxWidth = "none";
+    svg.style.maxHeight = "none";
+
+    if (isChromiumBrowser()) {
+      const zoomPart = Math.min(scale, CHROMIUM_MERMAID_CSS_ZOOM_CAP);
+      const sizePart = scale / zoomPart;
+      svg.style.width = mermaidLayoutWidth * sizePart + "px";
+      svg.style.height = mermaidLayoutHeight * sizePart + "px";
+      if (zoomPart !== 1) {
+        activeHost.style.zoom = String(zoomPart);
+      }
+      return;
+    }
+
+    svg.style.width = mermaidLayoutWidth * scale + "px";
+    svg.style.height = mermaidLayoutHeight * scale + "px";
+  }
+
   function applyTransform() {
     if (!panEl) return;
+    if (isMermaidHost(activeHost)) {
+      ensureMermaidBaseSize();
+    }
+    const mermaidZoom = mermaidUsesDedicatedZoom();
     panEl.style.transform =
-      "translate(" + translateX + "px, " + translateY + "px) scale(" + scale + ")";
+      "translate(" + translateX + "px, " + translateY + "px)" +
+      (mermaidZoom ? "" : " scale(" + scale + ")");
+    if (mermaidZoom && activeHost) {
+      applyMermaidVisualScale();
+    }
   }
 
   function resetView() {
     translateX = 0;
     translateY = 0;
     scale = 1;
+    if (isMermaidHost(activeHost)) {
+      clearMermaidZoomStyles(activeHost);
+    }
     applyTransform();
 
     if (!activeHost || !stage) return;
@@ -104,9 +213,13 @@
           return;
         }
 
+        if (isMermaidHost(activeHost)) {
+          ensureMermaidBaseSize();
+        }
+
         const hostRect = activeHost.getBoundingClientRect();
-        const hostWidth = hostRect.width;
-        const hostHeight = hostRect.height;
+        const hostWidth = mermaidLayoutWidth > 0 ? mermaidLayoutWidth : hostRect.width;
+        const hostHeight = mermaidLayoutHeight > 0 ? mermaidLayoutHeight : hostRect.height;
         if (!hostWidth || !hostHeight) {
           scale = MIN_COMFORT_SCALE;
           applyTransform();
@@ -146,16 +259,16 @@
     overlay.hidden = true;
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", "Visualização ampliada");
+    overlay.setAttribute("aria-label", "Enlarged view");
 
     const toolbar = document.createElement("div");
     toolbar.className = "media-zoom-toolbar";
     toolbar.innerHTML =
       '<div class="media-zoom-actions">' +
-      actionButton("zoom-in", "Aumentar zoom", ICON.zoomIn) +
-      actionButton("zoom-out", "Diminuir zoom", ICON.zoomOut) +
-      actionButton("reset", "Restaurar zoom", ICON.reset) +
-      actionButton("close", "Fechar", ICON.close) +
+      actionButton("zoom-in", "Zoom in", ICON.zoomIn) +
+      actionButton("zoom-out", "Zoom out", ICON.zoomOut) +
+      actionButton("reset", "Reset zoom", ICON.reset) +
+      actionButton("close", "Close", ICON.close) +
       "</div>";
 
     stage = document.createElement("div");
@@ -267,10 +380,20 @@
       closeOverlay();
     }
 
+    mermaidLayoutWidth = 0;
+    mermaidLayoutHeight = 0;
+    if (isMermaidHost(sourceHost)) {
+      storeMermaidBaseSize(sourceHost);
+    }
+
     hostAnchor = document.createComment("media-zoom-anchor");
     sourceHost.before(hostAnchor);
     panEl.appendChild(sourceHost);
     activeHost = sourceHost;
+
+    if (overlay) {
+      overlay.classList.toggle("media-zoom-overlay--mermaid", isMermaidHost(activeHost));
+    }
 
     const overlayImg = sourceHost.querySelector("img");
     if (overlayImg) {
@@ -287,11 +410,17 @@
     if (!overlay) return;
 
     if (activeHost && hostAnchor && hostAnchor.parentNode) {
+      clearMermaidZoomStyles(activeHost);
       hostAnchor.replaceWith(activeHost);
     }
     activeHost = null;
     hostAnchor = null;
+    mermaidLayoutWidth = 0;
+    mermaidLayoutHeight = 0;
 
+    if (overlay) {
+      overlay.classList.remove("media-zoom-overlay--mermaid");
+    }
     overlay.hidden = true;
     document.body.style.overflow = "";
     translateX = 0;
@@ -361,7 +490,7 @@
         observeFullscreenHint(el);
         return;
       }
-      registerZoomHost(el, "mermaid", "Abrir diagrama em tela cheia");
+      registerZoomHost(el, "mermaid", "Open diagram in fullscreen");
     });
   }
 
@@ -378,7 +507,7 @@
       img.parentNode.insertBefore(host, img);
       host.appendChild(img);
       img.dataset.zoomInit = "1";
-      registerZoomHost(host, "image", "Abrir imagem em tela cheia");
+      registerZoomHost(host, "image", "Open image in fullscreen");
     });
   }
 
