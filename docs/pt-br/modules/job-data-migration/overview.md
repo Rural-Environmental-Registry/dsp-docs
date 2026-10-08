@@ -144,6 +144,7 @@ Cada “volta” do job é um processo que **sobe, trabalha e desliga**; no modo
 | Motor incremental | `WatermarkChangeDetectionEngine` · tabela `BATCH_JOB_EXECUTION_SYNC_STATE` |
 | Modos no `.env` | `DSP_MIGRATION_EXECUTION_MODE`: `once`, `scheduled-once`, `continuous` |
 | Flags de download | `requires_s3_file_regeneration` em `territory_level_2` / `_3` |
+| Vínculo AOI → nível 3 | Coluna de origem opcional; senão `territory_level_3_id` calculado na migração (`ST_Intersection`, maior % da área da AOI no polígono L3) |
 
 Rodar o JAR isolado (sem core): Java 21, `./mvnw`, quatro bancos acessíveis e `application.yaml` gerado pelo `./config.sh` (repositório `rer-dsp-core`).
 
