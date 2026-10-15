@@ -132,7 +132,9 @@ No **Step 3 — Setup mode**, escolha:
 
 Ao final do fluxo real, o setup **salva as agendas** escolhidas no arquivo `.env`. Rodar `./setup.sh` de novo com opção **2** repete as perguntas, usando o que já estiver salvo como padrão.
 
-- **Opção 3 — Stack status / cleanup / exit**:
+- **Opção 3 — Configuração RER**: use depois da opção **4** do `./config.sh` (configuração e estilo RER). Segue o caminho do adotante real sem perguntar quando nem de quanto em quanto tempo migrar. A primeira importação roda durante este `./setup.sh`. Depois disso, a re-sincronização dos dados e a geração de arquivos de download rodam a cada 2 minutos (`*/2 * * * *`).
+
+- **Opção 4 — Stack status / cleanup / exit**:
   - Lista status dos containers do projeto e URLs conhecidas.
   - Opcionalmente remove containers, volumes e imagens **deste** projeto (confirmação explícita).
   - **Não** executa seed, migração nem sobe backend/frontend.

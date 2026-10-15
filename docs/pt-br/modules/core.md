@@ -67,12 +67,12 @@ Rodar sem argumentos (`./config.sh`). Antes do wizard, o script confere os repos
 
 O wizard **não** pergunta horário de job batch nem grava `DSP_MIGRATION_CRON` ou `DSP_GEO_FILE_GENERATION_CRON`. Reaplicar (opção **1**) não altera crons no `.env`.
 
-**Primeira execução** (sem `adopter-config.yaml` ainda): o script pergunta como configurar:
+**Primeira execução** (sem `adopter-config.yaml` ainda): o script pergunta como configurar. Enter mantém o wizard guiado.
 
 | Opção | Ação |
 |-------|------|
-| 1 | **Configuração guiada** — wizard passo a passo |
-| 2 | **Configuração existente** — coloque seu `adopter-config.yaml` no caminho indicado e reaplique depois (opção 1 do menu abaixo) |
+| 1 | **Configuração guiada** — wizard passo a passo. Dentro do wizard ainda dá para colocar o próprio `adopter-config.yaml` e reaplicar depois (opção 1 do menu abaixo) |
+| 4 | **Apply RER configuration and style** — copia `config/adopter/rer-adopter-config.yaml` para `adopter-config.yaml` e gera os arquivos operacionais com o mesmo comando da opção 2 (`--wizard --edit`). Não é preciso editar arquivo para o DSP conectar à aplicação RER |
 
 **Execuções seguintes** (quando o YAML já existe):
 
@@ -81,6 +81,7 @@ O wizard **não** pergunta horário de job batch nem grava `DSP_MIGRATION_CRON` 
 | 1 | Reaplicar a configuração existente sem passar pelo wizard novamente |
 | 2 | Editar a configuração existente (reabre o wizard já preenchido com os valores atuais) |
 | 3 | Recomeçar do zero a partir do template (`adopter-config.yaml.example`), descartando o arquivo atual |
+| 4 | **Apply RER configuration and style** — substitui `adopter-config.yaml` por `rer-adopter-config.yaml` e gera os arquivos operacionais (`--wizard --edit`) |
 
 !!! tip "Duas formas de configurar"
     Você pode seguir o **wizard passo a passo** (recomendado — cada pergunta explica o campo e onde o valor é usado, mostrando o valor atual/padrão entre colchetes e mantendo-o se você só apertar Enter), **ou editar diretamente** o arquivo `config/adopter/adopter-config.yaml` num editor de texto, usando `config/adopter/adopter-config.yaml.example` como referência de estrutura. Depois de editar o adotante, rode `./config.sh` e escolha **1 — Reaplicar** para regenerar os JSON/YAML operacionais. **Não** edite `installation-config.json`, `mapLayersConfig.json`, `downloadThemesConfig.json` nem os `application.yaml` dos jobs à mão.
@@ -144,13 +145,14 @@ O YAML do adotante (`config/adopter/adopter-config.yaml` / `.yaml.example`) tem 
 
 ### `./setup.sh`
 
-Prepara bancos, GeoServer e (no fluxo real) a primeira migração. Roda sem argumentos e apresenta um menu com **três opções**:
+Prepara bancos, GeoServer e (no fluxo real) a primeira migração. Roda sem argumentos e apresenta um menu com **quatro opções**:
 
 | Opção | Ação |
 |-------|------|
 | **1 — Demonstração** | Seed sintético do Brasil, **sem** fonte JDBC nem job de migração. Indicada para explorar a UI ou avaliar a stack. |
 | **2 — Adotante real (ETL via JDBC)** | Requer `./config.sh` antes. Pergunta **quando** e **como** a migração deve rodar (submenu abaixo). Grava em `dsp-db` + `dsp-geoserver-db`. |
-| **3 — Status / cleanup / sair** | Status dos containers e URLs; opcionalmente remove recursos Docker do projeto. Não sobe nem migra. |
+| **3 — Configuração RER** | Mesmo caminho do adotante real, sem perguntas de agenda. Use depois da opção 4 do `./config.sh`. A primeira migração roda neste setup (`continuous`); em seguida a re-sincronização dos dados e a geração de arquivos de download usam `*/2 * * * *`. |
+| **4 — Status / cleanup / sair** | Status dos containers e URLs; opcionalmente remove recursos Docker do projeto. Não sobe nem migra. |
 
 #### Submenu da opção 2 — plano de migração
 
