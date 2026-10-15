@@ -13,7 +13,7 @@ Organizations with a geospatial database (rural properties, territories, adminis
 1. **Exposing the source database directly is risky**—internal schema, performance, and production database security are exposed to external queries.
 2. **Building an API + frontend + map publication stack from scratch is expensive** and repetitive—every organization solves the same problem in isolation.
 
-The DSP addresses this with a synchronization pipeline (ETL) that reads from the adopter’s source and writes in a controlled way to two DSP-owned target databases—one for the API, one for maps—without touching the source database at query time. For high data volume and large territories (such as Brazil’s national [SICAR](https://www.car.gov.br/) registry), a pre-generation job produces the heaviest download files ahead of time and stores a ready preview for delivery; public consultation stays fast even with millions of records and exports by municipality, state, or country.
+The DSP addresses this with a synchronization pipeline (ETL) that reads from the adopter’s source and writes in a controlled way to two DSP-owned target databases—one for the API, one for maps—without touching the source database at query time. After migration, a KPI job computes each property’s area and the per-theme indicators (linked layers), writing `dsp.area_of_interest.area` and `dsp.kpi_measure` for the UI totalizers. For high data volume and large territories (such as Brazil’s national [SICAR](https://www.car.gov.br/) registry), a pre-generation job produces the heaviest download files ahead of time and stores a ready preview for delivery; public consultation stays fast even with millions of records and exports by municipality, state, or country.
 
 ## When should it be used?
 

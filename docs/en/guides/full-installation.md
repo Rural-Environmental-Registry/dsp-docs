@@ -19,7 +19,7 @@ This guide targets an **infrastructure administrator** responsible for putting t
 
 ```mermaid
 flowchart LR
-  r["Step 1<br/>Organize repositories"] --> e["Step 2<br/>Enter rer-dsp-core"]
+  r["Step 1<br/>Organize repositories"] --> e["Step 2<br/>Enter dsp-core"]
   e --> a["Step 3<br/>./config.sh (wizard)"]
   a --> b["generates adopter-config.yaml<br/>and operational files"]
   b --> c["Step 4<br/>./setup.sh (option 2)"]
@@ -28,51 +28,53 @@ flowchart LR
 
 ### Step 1 — Organize repositories
 
-The DSP is split into **sibling repositories** on GitHub. We recommend creating a `rer-dsp` folder and cloning everything **at the same level** — `rer-dsp-core` expects other modules at `../rer-dsp-backend`, `../rer-dsp-frontend`, etc.
+The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level**.
+
+The scripts look for each module in this order: first the short folder (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) and, if the code is not there, the folder named after the repository (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`). When both are missing, the automatic download creates the repository-named folder. Automatic publishing in CI keeps using the short folder.
 
 #### Option A — simplest flow (recommended)
 
 Create the folder, clone only the core, and enter it. The `./config.sh`, `./setup.sh`, and `./start.sh` scripts detect missing sibling repositories and offer to clone them automatically next to the core:
 
 ```bash
-mkdir rer-dsp && cd rer-dsp
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-core.git
-cd rer-dsp-core
+mkdir dsp && cd dsp
+git clone https://github.com/Rural-Environmental-Registry/dsp-core.git
+cd dsp-core
 ```
 
 After you accept automatic cloning in the scripts, the typical tree looks like this:
 
 ```text
-rer-dsp/
-├── rer-dsp-core/          ← you work here (config.sh, setup.sh, start.sh)
-├── rer-dsp-backend/
-├── rer-dsp-frontend/
-├── rer-dsp-job-data-migration/
-└── rer-dsp-job-geo-file-generation/
+dsp/
+├── dsp-core/          ← you work here (config.sh, setup.sh, start.sh)
+├── dsp-backend/
+├── dsp-frontend/
+├── dsp-job-data-migration/
+└── dsp-job-geo-file-generation/
 ```
 
 #### Option B — manual clone
 
-Clone all application repositories as sibling folders inside `rer-dsp`:
+Clone all application repositories as sibling folders inside `dsp`:
 
 ```bash
-mkdir rer-dsp && cd rer-dsp
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-core.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-backend.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-frontend.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-job-data-migration.git
-git clone https://github.com/Rural-Environmental-Registry/rer-dsp-job-geo-file-generation.git
+mkdir dsp && cd dsp
+git clone https://github.com/Rural-Environmental-Registry/dsp-core.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-backend.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-frontend.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-job-data-migration.git
+git clone https://github.com/Rural-Environmental-Registry/dsp-job-geo-file-generation.git
 ```
 
 Result:
 
 ```text
-rer-dsp/
-├── rer-dsp-core/
-├── rer-dsp-backend/
-├── rer-dsp-frontend/
-├── rer-dsp-job-data-migration/
-└── rer-dsp-job-geo-file-generation/
+dsp/
+├── dsp-core/
+├── dsp-backend/
+├── dsp-frontend/
+├── dsp-job-data-migration/
+└── dsp-job-geo-file-generation/
 ```
 
 ### Step 2 — Enter the core
@@ -80,7 +82,7 @@ rer-dsp/
 If you are not already inside the core:
 
 ```bash
-cd rer-dsp/rer-dsp-core
+cd dsp/dsp-core
 ```
 
 You do not need to create or copy `.env` manually. The file is generated automatically on first run of `./config.sh` or `./setup.sh`, from `.env.example`, when it does not exist yet.
@@ -97,7 +99,7 @@ The flow has **6 guided steps** (the last, About, is optional):
 | **2** | Tables, columns, SRID, and generic layers |
 | **3** | Application text, date formats |
 | **4** | UI: hierarchy, screens, map, fixed layer styles |
-| **5** | KPIs (colors, area unit, themes 0–4) |
+| **5** | KPIs (colors, area unit, themes 0–4). The numeric area does **not** come from the source: `kpiCalculationJob` computes `dsp.area_of_interest.area` and theme rows in `dsp.kpi_measure` after migration |
 | **6** | Optional About (Markdown tabs) |
 
 `./config.sh` writes the **adopter source of truth** to `config/adopter/adopter-config.yaml` — **this** is the file meant for manual editing or importing ready YAML. On reapply (wizard or option **1 — Reapply**), `./config.sh` **generates operational files** consumed by backend, GeoServers, and jobs. **Do not edit those operational files by hand:** they are overwritten on every `./config.sh`.
@@ -145,11 +147,11 @@ Used **after** `./setup.sh`, with databases, GeoServers, and jobs (when present)
 
 At the end, open **http://localhost:8026/dsp/** in the browser (or the URL `./start.sh` shows if you changed port or address in `.env`).
 
-Full detail for each option and sub-flow: [rer-dsp-core](../modules/core.md#the-three-scripts).
+Full detail for each option and sub-flow: [dsp-core](../modules/core.md#the-three-scripts).
 
 ## Next steps
 
 | I want to... | Page |
 |----------|--------|
 | Understand detailed data flow | [Data flow](../architecture/data-flow.md) |
-| See all core environment variables | [rer-dsp-core](../modules/core.md) |
+| See all core environment variables | [dsp-core](../modules/core.md) |

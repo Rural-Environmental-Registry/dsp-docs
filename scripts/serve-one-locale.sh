@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Live reload de um idioma (sem troca no menu — use ../start-docs.sh para os dois).
+# Live reload de um idioma (sem troca no menu — os dois idiomas: ./scripts/build-site.sh e sirva site/).
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"

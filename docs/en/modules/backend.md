@@ -1,10 +1,10 @@
-# rer-dsp-backend
+# dsp-backend
 
-This module is part of the [DSP](../index.md) — see the full documentation in [rer-dsp-docs](../index.md). The information below covers this module only.
+This module is part of the [DSP](../index.md) — see the full documentation in [dsp-docs](../index.md). The information below covers this module only.
 
 ## Purpose
 
-The `rer-dsp-backend` is the DSP REST API: it exposes business data, territorial hierarchy, downloads, and map configuration to the frontend and other consumers.
+The `dsp-backend` is the DSP REST API: it exposes business data, territorial hierarchy, downloads, and map configuration to the frontend and other consumers.
 
 ## Responsibilities
 
@@ -30,7 +30,7 @@ The `rer-dsp-backend` is the DSP REST API: it exposes business data, territorial
 ./gradlew bootRun
 ```
 
-Or via Docker, orchestrated by `rer-dsp-core` — which offers two modes: [demo](../guides/quick-start.md) (synthetic seed, no external database) or [full installation](../guides/full-installation.md) (adopter data via JDBC source). In Docker the container does not publish a port on the host: the API is reached through the core gateway at `/dsp-backend`.
+Or via Docker, orchestrated by `dsp-core` — which offers two modes: [demo](../guides/quick-start.md) (synthetic seed, no external database) or [full installation](../guides/full-installation.md) (adopter data via JDBC source). In Docker the container does not publish a port on the host: the API is reached through the core gateway at `/dsp-backend`.
 
 ## Environment variables
 
@@ -77,7 +77,7 @@ Territorial **data** (L1/L2/L3 units) lives in tables `dsp.territory_level_*`. T
 
 | Item | Value |
 |------|--------|
-| Default file | `rer-dsp-backend/src/main/resources/installationConfig.json` |
+| Default file | `dsp-backend/src/main/resources/installationConfig.json` |
 | Property | `dsp.installation-config.file` |
 | Environment variable | `DSP_INSTALLATION_CONFIG_FILE` |
 
@@ -169,12 +169,30 @@ Example with planet mode:
 | `screens.home` / `screens.downloads` | Which levels each screen uses and field labels. In `screens.home.detail.fields`, the exclusive AOI detail list (`field` + `label`) |
 | `kpis` | Home cards (labels, units, colors) |
 | `map.initialView` | Map open/reset mode on Home. Required `mode`: `territorial_bbox` (frame via `GET /territory/boundary-box`; if no L1/L2/L3 territorial level is configured in ETL, `./config.sh` writes `planet` explicitly), `manual` (requires `latitude`, `longitude`, `zoom`), or `planet` (always center `[0,0]` zoom `0`) |
-| `areaOfInterest` | Property area unit/label — the area itself comes from the source migration; the DSP does not compute or convert units |
+| `areaOfInterest` | Property area unit/label (`areaUnit`, `optionalLabel`) — the numeric value comes from `dsp.area_of_interest.area`, **computed** by `kpiCalculationJob` from geometry on geo-target |
 | `formats` | Date/time display patterns in the UI |
 
 Between frontend and backend, dates always travel as `yyyy-MM-dd` (date only) or `yyyy-MM-dd'T'HH:mm:ss` (date + time); the UI converts to `formats.date`/`formats.dateTime` for display.
 
 What does **not** go in this file: territorial units (`dsp.territory_level_*` tables + migration job), WMS/GeoServer layers (`GET /map/getBaseMaps` and `GET /map/getLayers`), download catalog (`downloadThemesConfig.json`), and ETL source→destination mapping (migration job `application.yaml`).
+
+## TotalizerService (`POST /totalizer/`)
+
+Configuration (`GET /config/installation`) defines **which** cards appear on Home (`kpis.cards[]`: codes `AREA_OF_INTEREST`, `THEME_1`…`THEME_4`, labels, units, colors, and `layer` on themes). **Values** come from `POST /totalizer/` with an optional territorial filter (`level2Ids`, `level3Ids`).
+
+| Card (`code`) | Aggregation | Source on `dsp-db` |
+|---------------|-------------|--------------------|
+| `AREA_OF_INTEREST` | Property count + sum of `area` | `dsp.area_of_interest` (L2/L3 filter via `territory_level_3_id`) |
+| `THEME_1`…`THEME_4` | Sum of `value` where `kpi_name` = `card.layer` | `dsp.kpi_measure` (same territorial filter) |
+
+Each theme card’s `layer` must match `kpis.themes[].layer-name` in the job `application.yaml` and the table name on geo-target (`dsp.<layer_name>`).
+
+With `theme_count: 0` on the adopter, only the `AREA_OF_INTEREST` card is generated; `kpi_measure` stays empty after the KPI job.
+
+Job detail: [KPI calculation](job-data-migration/overview.md#kpi-calculation).
+
+!!! note "Configuration cache"
+    `InstallationConfigService` keeps the JSON in memory. After `./config.sh`, restart the `dsp-backend` container (or local `./gradlew bootRun`) so new cards or `theme_count` show up in the API. The frontend also caches `GET /config/installation` for the session — hard-refresh if cards changed.
 
 ## Downloads (GeoServer Download WFS)
 
@@ -182,10 +200,12 @@ The download theme catalog comes from `downloadThemesConfig.json`, generated by 
 
 1. Validates territory (level 2 required, level 3 optional) in `dsp-db`.
 2. Builds a CQL filter per theme.
-3. Queries **GeoServer Download** via WFS (`GetFeature` with `resultType=hits` for search; `outputFormat=csv` for download) at `DSP_GEOSERVER_WFS_BASE_URL`.
+3. Queries **GeoServer Download** via WFS (`GetFeature` with `resultType=hits` for search; `outputFormat=csv` or `outputFormat=gpkg` for download) at `DSP_GEOSERVER_WFS_BASE_URL`.
 4. For themes with features in the extent, reads `updated_at` via WFS (`sortBy`, `count=1`) and fills `lastUpdate` in the response (business date).
 5. Reads the `generated-at` metadata on the storage object (`HeadObject` for the theme’s first format) and fills `lastFileGenerated`. The job writes that instant in the same UTC ISO as the CSV (`yyyy-MM-dd'T'HH:mm:ss'Z'`, example `2026-09-10T16:55:19Z`), without fractional seconds — it does not use `Instant.toString()`. Without an object or with storage down, the field is `null`.
-6. Returns status or CSV bytes to the frontend — the browser does not access GeoServer for download files.
+6. Returns status or file bytes to the frontend — the browser does not access GeoServer for download files.
+
+CSV comes from the bucket or, when the object is missing, from WFS `outputFormat=csv`. GPKG follows the same path (`outputFormat=gpkg`) on download. In search, CSV and GPKG are marked available when there are features in the extent; GPKG is also available when a bucket object exists even with an empty extent (pre-generated file). Download still prefers the bucket and falls back to WFS for both formats. The area-of-interest ZIP includes only the requested format (`format=csv` or `format=gpkg`) for themes that declare it and have features in the extent. The fallback GeoPackage uses `EPSG:4326`; the file produced by the job keeps the layer SRID.
 
 If `updated_at` is missing in WFS, search still works and `lastUpdate` is `null` (UI shows `—`). Without `generated-at`, `lastFileGenerated` is also `null` (UI shows `—`). Files already in the bucket only get `generated-at` on the next successful generation.
 
@@ -197,8 +217,8 @@ Institutional About page content can be configured by the adopter via index file
 
 | Item | Value |
 |------|--------|
-| Property (index) | `dsp.about-config.config-file`, default `file:../rer-dsp-core/config/about/about-config.json` |
-| Property (content) | `dsp.about-config.content-dir`, default `file:../rer-dsp-core/config/about/` |
+| Property (index) | `dsp.about-config.config-file`, default `file:../dsp-core/config/about/about-config.json` |
+| Property (content) | `dsp.about-config.content-dir`, default `file:../dsp-core/config/about/` |
 | Environment variables | `DSP_ABOUT_CONFIG_FILE`, `DSP_ABOUT_CONTENT_DIR` |
 
 `AboutConfigService` reads the index JSON (`file:`/`classpath:`/plain path) and, for each tab, reads the corresponding `.md` inside `contentDir`, building the response; the result is cached. If `enabled=false` in the index or the index file is missing, the response has `enabled=false` and empty `tabs` — the application does not fail for that. Malformed JSON or a missing referenced `.md` results in a 500 error (same pattern as `InstallationConfigService`).

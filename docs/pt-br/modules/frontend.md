@@ -1,10 +1,10 @@
-# rer-dsp-frontend
+# dsp-frontend
 
-Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [rer-dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
+Este módulo é parte do [DSP](../index.md) — veja a documentação completa em [dsp-docs](../index.md). As informações abaixo tratam apenas deste módulo.
 
 ## Objetivo
 
-O `rer-dsp-frontend` é a interface web do DSP: busca por hierarquia territorial, KPIs, mapa interativo e telas de apoio (Geoservices, About).
+O `dsp-frontend` é a interface web do DSP: busca por hierarquia territorial, KPIs, mapa interativo e telas de apoio (Geoservices, About).
 
 ## Responsabilidades
 
@@ -62,16 +62,27 @@ O componente de mapa consome `/map/getBaseMaps` e `/map/getLayers` e integra o G
 
 Na ficha da Home, `screens.home.detail.fields` (via `GET /config/installation`) define os campos e a ordem. Os valores vêm de `attributes` no detalhe. Lista vazia ou ausente: os 8 campos atuais do DTO estrutural. Download e “outros próximos” ficam fora dessa lista.
 
+## KPIs na Home
+
+O fluxo separa **definição** e **valores**:
+
+1. `GET /config/installation` → quais cards exibir (`kpis.cards[]`), rótulos, unidades e cores.
+2. `POST /totalizer/` → totais agregados para o recorte territorial atual (L2/L3).
+
+Sem o KPI job concluído, os cards podem aparecer com valores zerados (área da AOI e temas dependem de `dsp.area_of_interest.area` e `dsp.kpi_measure`).
+
 ## Integração com o backend
 
 Endpoints consumidos pelo frontend:
 
 | Endpoint | Uso |
 |----------|-----|
-| `GET /config/installation` | Labels, hierarquia, telas, KPIs e `screens.home.detail.fields` |
+| `GET /config/installation` | Labels, hierarquia, telas, KPIs (cards, rótulos, unidades) e `screens.home.detail.fields` |
+| `POST /totalizer/` | Valores dos cards de KPI na Home (contagem/soma da AOI + somas por tema), filtrados pela hierarquia selecionada |
 | `GET /downloads/themes` | Temas de download |
 | `POST /downloads/search` | Busca de itens por hierarquia/tema |
-| `GET /downloads/file` | Download de arquivo CSV via backend |
+| `GET /downloads/file` | Download de CSV ou GPKG via backend |
+| `GET /downloads/features-bundle` | ZIP da área de interesse (`aoiId` e `format` `csv` ou `gpkg`) |
 | `GET /map/getBaseMaps` | Mapas base |
 | `GET /map/getLayers` | Camadas de mapa |
 | `GET /geoServices/getRegions` | Regiões |
