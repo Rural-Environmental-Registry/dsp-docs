@@ -200,7 +200,7 @@ Mesmo motor das unidades administrativas e da AOI:
 - Sem delta → **SKIP** (mesmo que órfãos tenham sido apagados)
 
 !!! note "Escopo da change detection"
-    A remoção de órfãos acontece **somente no geo-target**. O DSP DB não é afetado por este módulo.
+    A remoção de órfãos acontece **somente no geo-target**. O DSP DB não é afetado por este módulo. Antes de apagar feições órfãs da camada, a migração registra os municípios (nível 3) afetados via join com `area_of_interest` e, ao terminar `COMPLETED`, marca `requires_s3_file_regeneration` nesses territórios — o job geo-file republica ou remove os arquivos no SeaweedFS.
 
 ### Passo 3 — Carga (UPSERT)
 
