@@ -141,6 +141,8 @@ A coluna `area` em `dsp.area_of_interest` e a tabela `dsp.kpi_measure` existem *
 
 `created_at` no destino é obrigatório (base do watermark). `updated_at` é preenchido quando o YAML declara `updated-at-column`.
 
+O init SQL das imagens Postgres cria o **esqueleto** de `dsp.area_of_interest` (colunas fixas acima). O job de migração adiciona colunas extras (`additional_columns` e mapeamentos) com `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` antes de gravar dados. Camadas genéricas continuam sendo criadas só pelo job.
+
 Por que não guardar o polígono inteiro no `dsp-db`? Ver o aviso em [Arquitetura — Fluxo de dados](overview.md#fluxo-de-dados).
 
 ---

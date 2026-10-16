@@ -217,8 +217,8 @@ O conteúdo institucional da página About pode ser configurado pelo adotante vi
 
 | Item | Valor |
 |------|--------|
-| Propriedade (índice) | `dsp.about-config.config-file`, default `file:../dsp-core/config/about/about-config.json` |
-| Propriedade (conteúdo) | `dsp.about-config.content-dir`, default `file:../dsp-core/config/about/` |
+| Propriedade (índice) | `dsp.about-config.config-file`, default `file:config/about/about-config.json` (repo `dsp-backend`) |
+| Propriedade (conteúdo) | `dsp.about-config.content-dir`, default `file:config/about/` |
 | Variáveis de ambiente | `DSP_ABOUT_CONFIG_FILE`, `DSP_ABOUT_CONTENT_DIR` |
 
 `AboutConfigService` lê o JSON de índice (`file:`/`classpath:`/caminho puro) e, para cada aba, lê o `.md` correspondente dentro de `contentDir`, montando a resposta; o resultado fica em cache. Se `enabled=false` no índice ou o arquivo de índice não existir, a resposta volta com `enabled=false` e `tabs` vazia — a aplicação não derruba por isso. JSON malformado ou `.md` referenciado ausente resultam em erro 500 (mesmo padrão do `InstallationConfigService`).

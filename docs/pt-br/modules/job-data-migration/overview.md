@@ -254,7 +254,7 @@ A ordem obrigatória no `application.yaml` é **L1 → L2 → L3 → area-of-int
 |------|--------|
 | Bancos e dual-write | [Bancos de dados](../../architecture/databases.md) |
 | Camadas genéricas | [Migração de camadas genéricas](generic-layers.md) |
-| Wizard e `application.yaml` | [dsp-core](../core.md) · `config/Job-Data-Migration/application/` |
+| Wizard e `application.yaml` | [dsp-core](../core.md) · `dsp-job-data-migration/config/application/` |
 | Checklist pós-carga | [Validação pós-migração](post-migration-validation.md) |
 | Pré-geração de CSV | [dsp-job-geo-file-generation](../job-geo-file-generation/overview.md) |
 | Fluxo entre componentes | [Fluxo de dados](../../architecture/data-flow.md) |

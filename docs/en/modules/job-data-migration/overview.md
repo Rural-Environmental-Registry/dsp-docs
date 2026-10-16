@@ -254,7 +254,7 @@ Required order in `application.yaml` is **L1 → L2 → L3 → area-of-interest 
 |-------|------|
 | Databases and dual-write | [Databases](../../architecture/databases.md) |
 | Generic layers | [Generic layer migration](generic-layers.md) |
-| Wizard and `application.yaml` | [dsp-core](../core.md) · `config/Job-Data-Migration/application/` |
+| Wizard and `application.yaml` | [dsp-core](../core.md) · `dsp-job-data-migration/config/application/` |
 | Post-load checklist | [Post-migration validation](post-migration-validation.md) |
 | CSV pre-generation | [dsp-job-geo-file-generation](../job-geo-file-generation/overview.md) |
 | Component flow | [Data flow](../../architecture/data-flow.md) |

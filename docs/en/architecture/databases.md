@@ -141,6 +141,8 @@ The `area` column on `dsp.area_of_interest` and the `dsp.kpi_measure` table exis
 
 `created_at` on the target is required (watermark base). `updated_at` is populated when the YAML declares `updated-at-column`.
 
+Postgres image init SQL creates the **minimal** `dsp.area_of_interest` skeleton (fixed columns above). The migration job adds extra columns (`additional_columns` and mappings) via `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` before writing data. Generic layers are still created only by the job.
+
 Why not store the whole polygon in `dsp-db`? See the note in [Architecture — Data flow](overview.md#data-flow).
 
 ---
