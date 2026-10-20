@@ -176,7 +176,17 @@ WHERE p.id IS NULL
 LIMIT 50;
 ```
 
-Repita o padrão para level-3 → level-2. AOI: `territory_level_3_id` deve existir em `dsp.territory_level_3`.
+Repita o padrão para level-3 → level-2. AOI: `territory_level_3_id` deve existir em `dsp.territory_level_3` quando o vínculo foi informado na origem ou calculado pelo job (interseção com maior % da área da AOI).
+
+### AOI sem `territory_level_3_id`
+
+Registros com FK nulo após a migração podem indicar geometria sem interseção com nenhum polígono L3 no geo-target:
+
+```sql
+SELECT COUNT(*) AS total,
+       COUNT(territory_level_3_id) AS com_l3
+FROM dsp.area_of_interest;
+```
 
 ## 6. Paralelização e performance
 

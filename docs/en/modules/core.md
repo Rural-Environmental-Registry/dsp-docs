@@ -67,20 +67,14 @@ Run with no arguments (`./config.sh`). Before the wizard, the script looks for e
 
 The wizard does **not** ask for batch job schedule nor write `DSP_MIGRATION_CRON` or `DSP_GEO_FILE_GENERATION_CRON`. Reapply (option **1**) does not change crons in `.env`.
 
-**First run** (no `adopter-config.yaml` yet): the script asks how to configure:
+The script always shows a single menu, including when `adopter-config.yaml` is not on disk yet:
 
 | Option | Action |
 |--------|--------|
-| 1 | **Guided configuration** — step-by-step wizard |
-| 2 | **Existing configuration** — place your `adopter-config.yaml` at the indicated path and reapply later (option 1 in the menu below) |
-
-**Later runs** (when YAML already exists):
-
-| Option | Action |
-|--------|--------|
-| 1 | Reapply existing configuration without going through the wizard again |
-| 2 | Edit existing configuration (reopens the wizard prefilled with current values) |
-| 3 | Start over from template (`adopter-config.yaml.example`), discarding the current file |
+| 1 | Reapply existing configuration without going through the wizard again. If the file is missing, copies `adopter-config.yaml.example` to `adopter-config.yaml` and reapplies |
+| 2 | Edit existing configuration (reopens the wizard prefilled with current values). If the file is missing, starts the wizard from the template, same as option 3 |
+| 3 | Start over from template (`adopter-config.yaml.example`). Discards the current file when it exists |
+| 4 | **Apply RER configuration and style** — replaces `adopter-config.yaml` with `rer-adopter-config.yaml`, generates the operational files without questions, and reports that the RER configuration is already correct |
 
 !!! tip "Two ways to configure"
     You can follow the **step-by-step wizard** (recommended — each question explains the field and where the value is used, showing current/default in brackets and keeping it if you press Enter), **or edit directly** `config/adopter/adopter-config.yaml` in a text editor, using `config/adopter/adopter-config.yaml.example` as a structure reference. After editing the adopter, run `./config.sh` and choose **1 — Reapply** to regenerate operational JSON/YAML. Do **not** edit `installation-config.json`, `mapLayersConfig.json`, `downloadThemesConfig.json`, or job `application.yaml` files by hand.
@@ -93,7 +87,7 @@ The wizard is split into **6 stages**. In each, the operator answers guided ques
 | Stage | What is configured | Impact |
 |-------|-------------------|--------|
 | **1 — Source database** | Source JDBC URL, read user/password (`DSP_SOURCE_DB_USER` / `DSP_SOURCE_DB_PASSWORD`) | Migration job and `.env` |
-| **2 — Tables, columns, and layers** | For L1/L2/L3/AOI: table, PK (**one** column; composite not supported), `parent_key` (L2/L3), name, geometry, SRID, `created_at_column` (required), `updated_at_column` (optional), `where_clause`. On AOI: `territory_level_3_column`, `additional_columns`. Generic layers in `etl.layers[]` (ETL + map + downloads in one block) | ETL plan, `mapLayersConfig.json`, and `downloadThemesConfig.json`. Extra layers: [Generic layer migration](job-data-migration/generic-layers.md) |
+| **2 — Tables, columns, and layers** | For L1/L2/L3/AOI: table, PK (**one** column; composite not supported), `parent_key` (L2/L3), name, geometry, SRID, `created_at_column` (required), `updated_at_column` (optional), `where_clause`. On AOI: `territory_level_3_column` (**optional** — if omitted or blank at source, the DSP derives `territory_level_3_id` from geometry against `dsp.territory_level_3`), `additional_columns`. Generic layers in `etl.layers[]` (ETL + map + downloads in one block) | ETL plan, `mapLayersConfig.json`, and `downloadThemesConfig.json`. Extra layers: [Generic layer migration](job-data-migration/generic-layers.md) |
 | **3 — Application** | Area-of-interest KPI label (`area_of_interest`), date and date-time formats | Dashboard, listings, and detail |
 | **4 — Interface** | Hierarchy labels, screen titles, AOI detail panel fields, `map.initialView` (`territorial_bbox` / `manual` / `planet`), groups and styles for fixed map layers | Frontend, layer selector, and styles published on GeoServer |
 | **5 — KPIs** | Card colors, AOI area unit, count and mapping of theme KPIs (0–4) | `kpis` block in `application.yaml`, `THEME_*` cards, and `kpi-job` |
@@ -150,13 +144,14 @@ Adopter YAML (`config/adopter/adopter-config.yaml` / `.yaml.example`) has an `ab
 
 ### `./setup.sh`
 
-Prepares databases, GeoServer, and (real flow) the first migration. Runs with no arguments and shows a menu with **three options**:
+Prepares databases, GeoServer, and (real flow) the first migration. Runs with no arguments and shows a menu with **four options**:
 
 | Option | Action |
 |--------|--------|
 | **1 — Demonstration** | Synthetic Brazil seed, **no** JDBC source or migration job. For exploring the UI or evaluating the stack. |
 | **2 — Real adopter (ETL via JDBC)** | Requires `./config.sh` first. Asks **when** and **how** migration should run (submenu below). Writes to `dsp-db` + `dsp-geoserver-db`. |
-| **3 — Status / cleanup / exit** | Container status and URLs; optionally removes Docker resources for the project. Does not start or migrate. |
+| **3 — RER configuration** | Same real-adopter path, without the schedule questions. Use after `./config.sh` option 4. First migration runs during setup (`continuous`); then data re-sync and download-file generation both use `*/2 * * * *`. |
+| **4 — Status / cleanup / exit** | Container status and URLs; optionally removes Docker resources for the project. Does not start or migrate. |
 
 #### Option 2 submenu — migration plan
 

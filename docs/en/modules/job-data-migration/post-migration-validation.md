@@ -176,7 +176,17 @@ WHERE p.id IS NULL
 LIMIT 50;
 ```
 
-Repeat the pattern for level-3 → level-2. AOI: `territory_level_3_id` must exist in `dsp.territory_level_3`.
+Repeat the pattern for level-3 → level-2. AOI: `territory_level_3_id` must exist in `dsp.territory_level_3` when supplied from source or computed by the job (largest AOI area % intersection with an L3 polygon).
+
+### AOI without `territory_level_3_id`
+
+Null FK after migration may mean the geometry does not intersect any L3 polygon on the geo-target:
+
+```sql
+SELECT COUNT(*) AS total,
+       COUNT(territory_level_3_id) AS with_l3
+FROM dsp.area_of_interest;
+```
 
 ## 6. Parallelization and performance
 
