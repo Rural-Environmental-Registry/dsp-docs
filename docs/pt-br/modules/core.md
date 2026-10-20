@@ -67,21 +67,14 @@ Rodar sem argumentos (`./config.sh`). Antes do wizard, o script procura cada mó
 
 O wizard **não** pergunta horário de job batch nem grava `DSP_MIGRATION_CRON` ou `DSP_GEO_FILE_GENERATION_CRON`. Reaplicar (opção **1**) não altera crons no `.env`.
 
-**Primeira execução** (sem `adopter-config.yaml` ainda): o script pergunta como configurar. Enter mantém o wizard guiado.
+O script sempre mostra um único menu, inclusive quando `adopter-config.yaml` ainda não está no disco:
 
 | Opção | Ação |
 |-------|------|
-| 1 | **Configuração guiada** — wizard passo a passo. Dentro do wizard ainda dá para colocar o próprio `adopter-config.yaml` e reaplicar depois (opção 1 do menu abaixo) |
-| 4 | **Apply RER configuration and style** — copia `config/adopter/rer-adopter-config.yaml` para `adopter-config.yaml` e gera os arquivos operacionais com o mesmo comando da opção 2 (`--wizard --edit`). Não é preciso editar arquivo para o DSP conectar à aplicação RER |
-
-**Execuções seguintes** (quando o YAML já existe):
-
-| Opção | Ação |
-|-------|------|
-| 1 | Reaplicar a configuração existente sem passar pelo wizard novamente |
-| 2 | Editar a configuração existente (reabre o wizard já preenchido com os valores atuais) |
-| 3 | Recomeçar do zero a partir do template (`adopter-config.yaml.example`), descartando o arquivo atual |
-| 4 | **Apply RER configuration and style** — substitui `adopter-config.yaml` por `rer-adopter-config.yaml` e gera os arquivos operacionais (`--wizard --edit`) |
+| 1 | Reaplicar a configuração existente sem passar pelo wizard novamente. Se o arquivo não existir, copia `adopter-config.yaml.example` para `adopter-config.yaml` e reaplica |
+| 2 | Editar a configuração existente (reabre o wizard já preenchido com os valores atuais). Se o arquivo não existir, começa o wizard pelo template, como a opção 3 |
+| 3 | Recomeçar do zero a partir do template (`adopter-config.yaml.example`). Descarta o arquivo atual quando ele existe |
+| 4 | **Apply RER configuration and style** — substitui `adopter-config.yaml` por `rer-adopter-config.yaml`, gera os arquivos operacionais sem perguntas e informa que a configuração RER já está correta |
 
 !!! tip "Duas formas de configurar"
     Você pode seguir o **wizard passo a passo** (recomendado — cada pergunta explica o campo e onde o valor é usado, mostrando o valor atual/padrão entre colchetes e mantendo-o se você só apertar Enter), **ou editar diretamente** o arquivo `config/adopter/adopter-config.yaml` num editor de texto, usando `config/adopter/adopter-config.yaml.example` como referência de estrutura. Depois de editar o adotante, rode `./config.sh` e escolha **1 — Reaplicar** para regenerar os JSON/YAML operacionais. **Não** edite `installation-config.json`, `mapLayersConfig.json`, `downloadThemesConfig.json` nem os `application.yaml` dos jobs à mão.
