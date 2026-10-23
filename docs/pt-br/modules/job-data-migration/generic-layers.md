@@ -196,11 +196,11 @@ flowchart TD
 Mesmo motor das unidades administrativas e da AOI:
 
 - **Delta** — registros com criação (ou `updated_at`) depois do watermark gravado em `BATCH_JOB_EXECUTION_SYNC_STATE`
-- **Órfãos** — PK só no geo-target → **DELETE** (scan a cada 24 h)
+- **Órfãos** — PK só no geo-target → **DELETE** (scan em toda execução **depois** da primeira carga com watermark gravado; na carga inicial o scan é omitido)
 - Sem delta → **SKIP** (mesmo que órfãos tenham sido apagados)
 
 !!! note "Escopo da change detection"
-    A remoção de órfãos acontece **somente no geo-target**. O DSP DB não é afetado por este módulo.
+    A remoção de órfãos acontece **somente no geo-target**. O DSP DB não é afetado por este módulo. Antes de apagar feições órfãs da camada, a migração registra os municípios (nível 3) afetados via join com `area_of_interest` e, ao terminar `COMPLETED`, marca `requires_s3_file_regeneration` nesses territórios — o job geo-file republica ou remove os arquivos no SeaweedFS.
 
 ### Passo 3 — Carga (UPSERT)
 

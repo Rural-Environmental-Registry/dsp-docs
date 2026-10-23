@@ -196,7 +196,7 @@ flowchart TD
 Same engine as admin units and AOI:
 
 - **Delta** — records with creation (or `updated_at`) after watermark stored in `BATCH_JOB_EXECUTION_SYNC_STATE`
-- **Orphans** — PK only on geo-target → **DELETE** (scan every 24 h)
+- **Orphans** — PK only on geo-target → **DELETE** (scan on every run **after** the first load with a persisted watermark; skipped on the initial load)
 - No delta → **SKIP** (even if orphans were deleted)
 
 !!! note "Change detection scope"

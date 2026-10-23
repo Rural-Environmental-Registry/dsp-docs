@@ -88,7 +88,7 @@ ORDER BY sync_key;
 | Leitura | Significado |
 |---------|-------------|
 | `watermark_last_event_at` nulo | Ainda não houve carga `COMPLETED` com delta |
-| `last_orphan_check_at` antigo (> 24 h) | A próxima execução deve varrer órfãos |
+| `watermark_last_event_at` preenchido e `last_orphan_check_at` parado | Execuções seguintes devem varrer órfãos e atualizar `last_orphan_check_at` |
 | Job `COMPLETED` mas watermark igual | Sem delta temporal (SKIP ou só órfãos) |
 
 Para reprocessar do zero um job, apague a linha do `sync-key` correspondente (e, se precisar, os dados do destino).
@@ -113,7 +113,7 @@ FROM dsp.territory_level_1
 WHERE geom IS NOT NULL;
 ```
 
-A primeira carga deve refletir a origem filtrada por `where-clause` e `creation-date-column IS NOT NULL`. Cargas seguintes só entram registros novos ou atualizados depois do watermark; órfãos saem no scan periódico.
+A primeira carga deve refletir a origem filtrada por `where-clause` e `creation-date-column IS NOT NULL`. Cargas seguintes só entram registros novos ou atualizados depois do watermark; órfãos saem na varredura de PK de cada execução (após existir watermark).
 
 ## 3. Integridade de chave e órfãos
 

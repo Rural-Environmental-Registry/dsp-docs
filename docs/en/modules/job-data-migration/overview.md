@@ -31,7 +31,7 @@ The migration job does four main things:
 3. **On the next run, it does not copy everything again** — only records **new or changed** since the last successful copy (this is the *watermark*, a “bookmark” kept by the job itself).
 4. **After the copy, it calculates Home KPIs.** `kpiCalculationJob` reads geometries in the map database, writes each property’s area to `dsp.area_of_interest.area`, and writes per-theme indicators to `dsp.kpi_measure` — light database only. That area does **not** come from the source.
 
-If a record **disappears** at the source, the job can also **remove** the copy in the DSP (periodic “orphan” sweep).
+If a record **disappears** at the source, the job can also **remove** the copy in the DSP (orphan PK sweep on every run after the first load).
 
 It is **not** the program that publishes layers on the site map: `./setup.sh` does that after data is already in the databases. It also **does not** generate large download files in S3 storage — it only **flags** which regions need them; the [geo-file job](../job-geo-file-generation/overview.md) generates the files.
 
@@ -254,7 +254,7 @@ Required order in `application.yaml` is **L1 → L2 → L3 → area-of-interest 
 |-------|------|
 | Databases and dual-write | [Databases](../../architecture/databases.md) |
 | Generic layers | [Generic layer migration](generic-layers.md) |
-| Wizard and `application.yaml` | [dsp-core](../core.md) · `config/Job-Data-Migration/application/` |
+| Wizard and `application.yaml` | [dsp-core](../core.md) · `dsp-job-data-migration/config/application/` |
 | Post-load checklist | [Post-migration validation](post-migration-validation.md) |
 | CSV pre-generation | [dsp-job-geo-file-generation](../job-geo-file-generation/overview.md) |
 | Component flow | [Data flow](../../architecture/data-flow.md) |

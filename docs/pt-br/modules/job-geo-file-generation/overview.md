@@ -115,20 +115,17 @@ Ao final da execução, o job lista `{formato}/level-2/` e `{formato}/level-3/` 
 | `target` | `dsp-db` · schema `dsp` (flags territoriais) |
 | `geo-target` | `dsp-geoserver-db` · schema `dsp` |
 
-Object storage (não é JDBC):
+Object storage (não é JDBC) — mesmas variáveis do backend, definidas em `.env` pelo `./config.sh` e repassadas pelo Compose:
 
-```yaml
-dsp:
-  object-storage:
-    endpoint: http://dsp-object-storage:8333
-    region: us-east-1
-    bucket: dsp-geo-files
-    access-key: ...
-    secret-key: ...
-    path-style-access: true
-```
+| Variável | Função |
+|----------|--------|
+| `DSP_OBJECT_STORAGE_ENDPOINT` | Endpoint S3 (SeaweedFS no adotante real) |
+| `DSP_OBJECT_STORAGE_REGION` | Região S3 |
+| `DSP_OBJECT_STORAGE_BUCKET` | Bucket (deve **existir** — o job não cria) |
+| `DSP_OBJECT_STORAGE_ACCESS_KEY` / `DSP_OBJECT_STORAGE_SECRET_KEY` | Credenciais |
+| `DSP_OBJECT_STORAGE_PATH_STYLE_ACCESS` | Path-style (padrão `true`) |
 
-Arquivo de runtime: `config/Job-Geo-File-Generation/application/application.yaml` (gerado pelo `./config.sh` a partir de `environment.object_storage` no `adopter-config.yaml`). O bucket deve **existir** — o job não cria.
+Config Spring no JAR (`src/main/resources/application.properties`). No Docker, Compose também define `SPRING_DATASOURCE_BATCH_*`, `SPRING_DATASOURCE_TARGET_*`, `SPRING_DATASOURCE_GEO_TARGET_*` e `DSP_DOWNLOAD_THEMES_FILE=file:/config/downloadThemesConfig.json`. Contrato alinhado ao [dsp-backend](../backend.md); o job de migração ainda usa YAML externo até migração futura.
 
 | Stack | Java 21, Spring Boot 3.4.2, Spring Batch, PostGIS, AWS SDK v2 (S3), Maven |
 
@@ -139,8 +136,10 @@ Arquivo de runtime: `config/Job-Geo-File-Generation/application/application.yaml
 | Variável / modo | Efeito |
 |-----------------|--------|
 | `DSP_OBJECT_STORAGE_ENDPOINT` | Liga profile `object-storage` (SeaweedFS + job) |
+| `SPRING_DATASOURCE_BATCH_*` / `TARGET_*` / `GEO_TARGET_*` | Três pools JDBC (Compose) |
+| `DSP_DOWNLOAD_THEMES_FILE` | Catálogo de temas (`/config/downloadThemesConfig.json` na imagem) |
 | `DSP_GEO_FILE_GENERATION_CRON` | Agenda no supercronic — definida no **`./setup.sh`**, não no wizard |
-| `DSP_GEO_FILE_GENERATION_EXECUTION_MODE` | `continuous` (padrão) ou `once` |
+| `DSP_GEO_FILE_GENERATION_EXECUTION_MODE` | `continuous` (padrão), `once` ou `wait-for-first-load` |
 
 Container `dsp-job-geo-file-generation`: sem porta HTTP; sobe junto com `dsp-object-storage` no adotante real.
 
@@ -152,7 +151,7 @@ Container `dsp-job-geo-file-generation`: sem porta HTTP; sobe junto com `dsp-obj
 ./mvnw spring-boot:run
 ```
 
-Exige `application.yaml` com os três datasources, bucket acessível e `dsp-geoserver-db` já populado pela migração. Uso típico: via `./setup.sh` do core.
+Exige os três datasources (defaults em `application.properties` ou env), bucket acessível e `dsp-geoserver-db` já populado pela migração. Uso típico: via `./setup.sh` do core.
 
 ---
 
