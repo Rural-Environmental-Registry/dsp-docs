@@ -31,7 +31,7 @@ O job de migração faz quatro coisas principais:
 3. **Na próxima execução, não copia tudo de novo** — só registros **novos ou alterados** desde a última cópia bem-sucedida (isso é o *watermark*, um “marca-página” guardado pelo próprio job).
 4. **Depois da cópia, calcula os KPIs da Home.** O `kpiCalculationJob` lê as geometrias no banco do mapa, grava a área de cada imóvel em `dsp.area_of_interest.area` e os indicadores por tema em `dsp.kpi_measure` — só no banco leve. Essa área **não** vem da origem.
 
-Se um registro **sumiu** na origem, o job também pode **remover** a cópia no DSP (varredura periódica de “órfãos”).
+Se um registro **sumiu** na origem, o job também pode **remover** a cópia no DSP (varredura de “órfãos” a cada execução, após a primeira carga).
 
 Ele **não** é o programa que publica as camadas no mapa do site: isso o `./setup.sh` faz depois que os dados já estão nos bancos. Ele também **não** gera os arquivos grandes de download no armazenamento S3 — só **avisa** quais regiões precisam disso; o [job geo-file](../job-geo-file-generation/overview.md) gera os arquivos.
 

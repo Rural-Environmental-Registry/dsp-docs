@@ -196,7 +196,7 @@ flowchart TD
 Mesmo motor das unidades administrativas e da AOI:
 
 - **Delta** — registros com criação (ou `updated_at`) depois do watermark gravado em `BATCH_JOB_EXECUTION_SYNC_STATE`
-- **Órfãos** — PK só no geo-target → **DELETE** (scan a cada 24 h)
+- **Órfãos** — PK só no geo-target → **DELETE** (scan em toda execução **depois** da primeira carga com watermark gravado; na carga inicial o scan é omitido)
 - Sem delta → **SKIP** (mesmo que órfãos tenham sido apagados)
 
 !!! note "Escopo da change detection"
