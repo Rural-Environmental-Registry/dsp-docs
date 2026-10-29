@@ -315,6 +315,7 @@ O `./config.sh` grava JDBC, SRID e `DSP_OBJECT_STORAGE_*` (a partir de `environm
 | `DSP_SOURCE_DB_USER` / `DSP_SOURCE_DB_PASSWORD` | Credenciais da fonte JDBC |
 | `DSP_MIGRATION_EXECUTION_MODE` | `once`: carga no setup e desliga o job. `continuous`: supercronic em `DSP_MIGRATION_CRON`. `scheduled-once`: uma carga em `DSP_MIGRATION_SCHEDULED_AT` |
 | `DSP_MIGRATION_CRON` | Cron Unix de 5 campos gerado pelo setup (ex.: `0 */6 * * *` ou `*/2 * * * *`). Só `continuous` |
+| (entrypoint migração) | No modo `continuous`, cada tic do supercronic passa `--execution-jobs.reconciliation-jobs=true` (incremental + delete + KPI no mesmo processo). Carga inicial / `once` não passam a flag |
 | `DSP_MIGRATION_SCHEDULED_AT` | Data/hora da primeira carga quando o setup escolhe **Schedule for later** |
 | `DSP_MIGRATION_TZ` | Fuso IANA do relógio de cron e `DSP_MIGRATION_SCHEDULED_AT` (padrão `UTC` no `.env.example`; não é o `source-timezone` JDBC) |
 | `DSP_GEO_FILE_GENERATION_EXECUTION_MODE` | `continuous` (padrão): supercronic em `DSP_GEO_FILE_GENERATION_CRON`. `once`: uma execução via `compose run` |
