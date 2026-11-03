@@ -176,11 +176,13 @@ Each layer gets **one independent Spring Batch job**.
 
 ```mermaid
 flowchart TD
-  A[Setup] --> B[Watermark change detection]
+  A[Setup] --> B[Watermark change detection — delta only]
   B --> C{Temporal delta?}
-  C -->|No| D[End — SKIP<br/>orphans may already have been deleted]
+  C -->|No| D[End — SKIP]
   C -->|Yes| E[Partitioned read]
   E --> F[UPSERT on geo-target]
+  G[Orphan reconciliation<br/>same DSP_MIGRATION_CRON tick] --> H[Geo-target scan + origin probe]
+  H --> I[DELETE orphans]
 ```
 
 ### Step 1 — Setup
@@ -196,8 +198,9 @@ flowchart TD
 Same engine as admin units and AOI:
 
 - **Delta** — records with creation (or `updated_at`) after watermark stored in `BATCH_JOB_EXECUTION_SYNC_STATE`
-- **Orphans** — PK only on geo-target → **DELETE** (scan on every run **after** the first load with a persisted watermark; skipped on the initial load)
-- No delta → **SKIP** (even if orphans were deleted)
+- No delta → **SKIP** (UPSERT does not run)
+
+**Orphans** (separate reconciliation job on the same `DSP_MIGRATION_CRON` tick when `execution-jobs.reconciliation-jobs=true`): batched geo-target scan + read-only origin probe; PK only on destination → **DELETE**. Initial load / flag off skips reconciliation.
 
 !!! note "Change detection scope"
     Orphan removal happens **only on geo-target**. DSP DB is not affected by this module.

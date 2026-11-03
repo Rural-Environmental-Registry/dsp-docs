@@ -31,7 +31,7 @@ The migration job does four main things:
 3. **On the next run, it does not copy everything again** — only records **new or changed** since the last successful copy (this is the *watermark*, a “bookmark” kept by the job itself).
 4. **After the copy, it calculates Home KPIs.** `kpiCalculationJob` reads geometries in the map database, writes each property’s area to `dsp.area_of_interest.area`, and writes per-theme indicators to `dsp.kpi_measure` — light database only. That area does **not** come from the source.
 
-If a record **disappears** at the source, the job can also **remove** the copy in the DSP (orphan PK sweep on every run after the first load).
+If a record **disappears** at the source, the job **removes** the copy in the DSP through dedicated orphan reconciliation jobs on the **same schedule** as periodic sync (`DSP_MIGRATION_CRON`), after incremental jobs and before KPI. Initial load (`once` / first `continuous` run) does not sweep orphans.
 
 It is **not** the program that publishes layers on the site map: `./setup.sh` does that after data is already in the databases. It also **does not** generate large download files in S3 storage — it only **flags** which regions need them; the [geo-file job](../job-geo-file-generation/overview.md) generates the files.
 
