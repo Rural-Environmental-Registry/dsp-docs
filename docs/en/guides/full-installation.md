@@ -28,7 +28,9 @@ flowchart LR
 
 ### Step 1 — Organize repositories
 
-The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level** — `dsp-core` expects other modules at `../dsp-backend`, `../dsp-frontend`, etc.
+The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level**.
+
+The scripts look for each module in this order: first the short folder (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) and, if the code is not there, the folder named after the repository (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`). When both are missing, the automatic download creates the repository-named folder. Automatic publishing in CI keeps using the short folder.
 
 #### Option A — simplest flow (recommended)
 
@@ -128,7 +130,7 @@ On **Step 3 — Setup mode**, choose:
 |-------------------|---------------|
 | **1 — One-time load** | Imports data **now**, during this `./setup.sh`, from the source database into DSP databases. Publishes map layers when done. The import job **shuts down** afterward — no automatic sync with the source. |
 | **2 — Living source** | Performs the **first import** like item 1 and publishes the map. Then asks **how often** to fetch new data from the source (for example daily, every few hours or minutes) and **how often** to generate ready download files, if you use object storage. Keeps jobs running in the background per those schedules. |
-| **3 — Deferred first load** | You specify **date and time** of the first import (and time zone). Databases stay empty until then; GeoServers start **without** map layers until the job runs. The import job waits. Then the script asks: **(a)** after that load data **no longer changes** — import once at the scheduled time, publish the map, and may generate ready downloads **once** after that import; **(b)** after the first load the source **keeps changing** — at the chosen time import starts and, from then on, the same schedule type as item 2 (sync and download generation). |
+| **3 — Deferred first load** | You specify **date and time in UTC** for the first import. Databases stay empty until then; GeoServers start **without** map layers until the job runs. The import job waits. Then the script asks: **(a)** after that load data **no longer changes** — import once at the scheduled time, publish the map, and may generate ready downloads **once** after that import; **(b)** after the first load the source **keeps changing** — at the chosen time import starts and, from then on, the same schedule type as item 2 (sync and download generation). |
 
 At the end of the real flow, setup **saves chosen schedules** in the `.env` file. Running `./setup.sh` again with option **2** repeats the questions, using what is already saved as default.
 

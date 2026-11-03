@@ -88,8 +88,8 @@ ORDER BY sync_key;
 | Reading | Meaning |
 |---------|---------|
 | `watermark_last_event_at` null | No `COMPLETED` load with delta yet |
-| `last_orphan_check_at` old (> 24 h) | Next run should sweep orphans |
-| Job `COMPLETED` but watermark unchanged | No temporal delta (SKIP or orphans only) |
+| `watermark_last_event_at` set but `last_orphan_check_at` stale | Next `DSP_MIGRATION_CRON` tick with reconciliation should sweep orphans and refresh `last_orphan_check_at` |
+| Incremental job `COMPLETED` but watermark unchanged | No temporal delta (UPSERT SKIP) |
 
 To reprocess a job from scratch, delete the row for the corresponding `sync-key` (and destination data if needed).
 
@@ -113,7 +113,7 @@ FROM dsp.territory_level_1
 WHERE geom IS NOT NULL;
 ```
 
-The first load should reflect the source filtered by `where-clause` and `creation-date-column IS NOT NULL`. Later loads only add records new or updated after the watermark; orphans are removed in the periodic scan.
+The first load should reflect the source filtered by `where-clause` and `creation-date-column IS NOT NULL`. Later loads only add records new or updated after the watermark; orphans are removed by reconciliation jobs on the same migration cron (not in incremental change detection).
 
 ## 3. Key integrity and orphans
 

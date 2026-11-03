@@ -19,7 +19,9 @@ This guide is **only to see the DSP running** on your machine: it starts a local
 
 ## Step 1 — Organize repositories
 
-The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level** — `dsp-core` expects other modules at `../dsp-backend`, `../dsp-frontend`, etc.
+The DSP is split into **sibling repositories** on GitHub. We recommend creating a `dsp` folder and cloning everything **at the same level**.
+
+The scripts look for each module in this order: first the short folder (`backend`, `frontend`, `job-data-migration`, `job-geo-file-generation`) and, if the code is not there, the folder named after the repository (`dsp-backend`, `dsp-frontend`, `dsp-job-data-migration`, `dsp-job-geo-file-generation`). When both are missing, the automatic download creates the repository-named folder. Automatic publishing in CI keeps using the short folder.
 
 #### Option A — simplest flow (recommended)
 
