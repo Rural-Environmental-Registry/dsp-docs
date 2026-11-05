@@ -205,7 +205,7 @@ O catálogo de temas de download vem de `downloadThemesConfig.json`, gerado pelo
 5. Lê a metadata `generated-at` do objeto no storage (`HeadObject` do primeiro formato do tema) e preenche `lastFileGenerated`. O job grava esse instante no mesmo ISO UTC do CSV (`yyyy-MM-dd'T'HH:mm:ss'Z'`, exemplo `2026-09-10T16:55:19Z`), sem fração de segundo — não usa `Instant.toString()`. Sem objeto ou storage desligado, o campo fica `null`.
 6. Devolve status ou os bytes do arquivo ao frontend — o browser não acessa o GeoServer para arquivos de download.
 
-O CSV vem do bucket ou, na falta do objeto, do WFS `outputFormat=csv`. O GPKG segue o mesmo caminho (`outputFormat=gpkg`) no download. Na busca, CSV e GPKG aparecem com status disponível quando há feições no recorte; o GPKG também fica disponível se existir objeto no bucket mesmo com recorte vazio (arquivo pré-gerado). O download continua priorizando o bucket e usa o WFS como fallback para os dois formatos. O ZIP da área de interesse leva só o formato pedido (`format=csv` ou `format=gpkg`) dos temas que declaram esse formato e têm feições no recorte. O GPKG do fallback sai em `EPSG:4326`; o arquivo gerado pelo job mantém o SRID da camada.
+O CSV vem do bucket ou, na falta do objeto, do WFS `outputFormat=csv`. O GPKG segue o mesmo caminho (`outputFormat=gpkg`) no download. Na busca, CSV e GPKG ficam disponíveis **somente** quando há feições no recorte (WFS). O download só entrega bytes se o recorte tiver feições; dentro disso, prioriza o bucket e usa o WFS como fallback. Objeto antigo no bucket com recorte vazio retorna indisponível (404) até o job geo-file remover o arquivo. O ZIP da área de interesse leva só o formato pedido (`format=csv` ou `format=gpkg`) dos temas que declaram esse formato e têm feições no recorte. O GPKG do fallback sai em `EPSG:4326`; o arquivo gerado pelo job mantém o SRID da camada.
 
 Se `updated_at` faltar no WFS, a busca continua OK e `lastUpdate` fica `null` (UI exibe `—`). Sem `generated-at`, `lastFileGenerated` também fica `null` (UI exibe `—`). Arquivos já no bucket só passam a ter `generated-at` na próxima geração bem-sucedida.
 
@@ -217,8 +217,8 @@ O conteúdo institucional da página About pode ser configurado pelo adotante vi
 
 | Item | Valor |
 |------|--------|
-| Propriedade (índice) | `dsp.about-config.config-file`, default `file:../dsp-core/config/about/about-config.json` |
-| Propriedade (conteúdo) | `dsp.about-config.content-dir`, default `file:../dsp-core/config/about/` |
+| Propriedade (índice) | `dsp.about-config.config-file`, default `file:config/about/about-config.json` (repo `dsp-backend`) |
+| Propriedade (conteúdo) | `dsp.about-config.content-dir`, default `file:config/about/` |
 | Variáveis de ambiente | `DSP_ABOUT_CONFIG_FILE`, `DSP_ABOUT_CONTENT_DIR` |
 
 `AboutConfigService` lê o JSON de índice (`file:`/`classpath:`/caminho puro) e, para cada aba, lê o `.md` correspondente dentro de `contentDir`, montando a resposta; o resultado fica em cache. Se `enabled=false` no índice ou o arquivo de índice não existir, a resposta volta com `enabled=false` e `tabs` vazia — a aplicação não derruba por isso. JSON malformado ou `.md` referenciado ausente resultam em erro 500 (mesmo padrão do `InstallationConfigService`).

@@ -217,8 +217,8 @@ Institutional About page content can be configured by the adopter via index file
 
 | Item | Value |
 |------|--------|
-| Property (index) | `dsp.about-config.config-file`, default `file:../dsp-core/config/about/about-config.json` |
-| Property (content) | `dsp.about-config.content-dir`, default `file:../dsp-core/config/about/` |
+| Property (index) | `dsp.about-config.config-file`, default `file:config/about/about-config.json` (`dsp-backend` repo) |
+| Property (content) | `dsp.about-config.content-dir`, default `file:config/about/` |
 | Environment variables | `DSP_ABOUT_CONFIG_FILE`, `DSP_ABOUT_CONTENT_DIR` |
 
 `AboutConfigService` reads the index JSON (`file:`/`classpath:`/plain path) and, for each tab, reads the corresponding `.md` inside `contentDir`, building the response; the result is cached. If `enabled=false` in the index or the index file is missing, the response has `enabled=false` and empty `tabs` — the application does not fail for that. Malformed JSON or a missing referenced `.md` results in a 500 error (same pattern as `InstallationConfigService`).
