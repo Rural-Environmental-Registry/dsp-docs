@@ -134,7 +134,9 @@ On **Step 3 — Setup mode**, choose:
 
 At the end of the real flow, setup **saves chosen schedules** in the `.env` file. Running `./setup.sh` again with option **2** repeats the questions, using what is already saved as default.
 
-- **Option 3 — Stack status / cleanup / exit**:
+- **Option 3 — RER configuration**: use after `./config.sh` option **4** (RER configuration and style). Follows the real-adopter path without asking when or how often to migrate. The first import runs during this `./setup.sh`. After that, data re-sync and download-file generation both run every 2 minutes (`*/2 * * * *`).
+
+- **Option 4 — Stack status / cleanup / exit**:
   - Lists project container status and known URLs.
   - Optionally removes containers, volumes, and images **for this** project (explicit confirmation).
   - Does **not** run seed, migration, or start backend/frontend.
